@@ -35,6 +35,7 @@ export function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullname, setFullname] = useState('');
   const [agreed, setAgreed] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export function RegisterForm() {
 
     setLoading(true);
     try {
-      await AuthService.register({ username, email, fullname: '', password, confirmPassword });
+      await AuthService.register({ username, email, fullname, password, confirmPassword });
       router.push('/login');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed';
@@ -123,6 +124,15 @@ export function RegisterForm() {
                     onChange={(e) => setUsername(e.target.value)}
                     classNames={inputClassNames}
                   />
+                                    <TextInput
+                    label="Full Name"
+                    placeholder="Your full name (optional)"
+                    size="md"
+                    radius="xl"
+                    value={fullname}
+                    onChange={(e) => setFullname(e.target.value)}
+                    classNames={inputClassNames}
+                  />
                   <TextInput
                     label="Email"
                     placeholder="hello@gmail.com"
@@ -154,7 +164,6 @@ export function RegisterForm() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     classNames={passwordClassNames}
                   />
-
                   <Checkbox
                     label={
                       <span className="text-xs leading-relaxed text-gray-500">
