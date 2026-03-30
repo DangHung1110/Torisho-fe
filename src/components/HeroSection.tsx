@@ -2,6 +2,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button, Container, Title, Text, Group, Box, Badge } from '@mantine/core';
+import Image from 'next/image';
+import { Baloo_2 } from 'next/font/google';
+
+const displayFont = Baloo_2({
+  subsets: ['latin'],
+  weight: ['700', '800'],
+});
 
 const learningPaths = [
   'Grammar SRS',
@@ -22,21 +29,17 @@ export default function HeroSection() {
 
     const handleTyping = () => {
       if (!isDeleting) {
-        // Typing
         if (displayText.length < currentWord.length) {
           setDisplayText(currentWord.substring(0, displayText.length + 1));
           setTypingSpeed(150);
         } else {
-          // Finished typing, wait then start deleting
           setTimeout(() => setIsDeleting(true), 2000);
         }
       } else {
-        // Deleting
         if (displayText.length > 0) {
           setDisplayText(currentWord.substring(0, displayText.length - 1));
           setTypingSpeed(100);
         } else {
-          // Finished deleting, move to next word
           setIsDeleting(false);
           setCurrentIndex((prevIndex) => (prevIndex + 1) % learningPaths.length);
           setTypingSpeed(500);
@@ -49,94 +52,119 @@ export default function HeroSection() {
   }, [displayText, isDeleting, currentIndex, typingSpeed]);
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden pt-40 pb-32" style={{
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 25%, #e3f2fd 50%, #f5f7fa 75%, #fff9e6 100%)'
-    }}>
-      {/* Decorative circles */}
-      <Box className="absolute top-20 right-20 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-yellow-200/40 to-orange-200/30 blur-3xl pointer-events-none" />
-      <Box className="absolute bottom-20 left-10 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-green-200/40 to-blue-200/30 blur-3xl pointer-events-none" />
+    <section
+      className="relative min-h-screen flex items-center overflow-hidden pt-28 pb-20"
+      style={{ background: 'linear-gradient(155deg, #f8faff 0%, #eef5ff 30%, #f0fdf4 65%, #fefce8 100%)' }}
+    >
+      {/* Background blobs */}
+      <Box className="absolute top-16 right-16 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-amber-200/45 to-orange-200/25 blur-3xl pointer-events-none" />
+      <Box className="absolute bottom-16 left-0 w-[320px] h-[320px] rounded-full bg-gradient-to-br from-emerald-200/35 to-blue-200/25 blur-3xl pointer-events-none" />
 
-      <Container size="xl" className="relative z-10 w-full px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-10 md:gap-20">
+      <Container size="xl" className="relative z-10 w-full">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16 lg:gap-20">
+
           {/* Left Content */}
-          <div className="space-y-10 max-w-3xl flex-1">
-            <Badge
-              variant="white"
-              color="blue"
-              size="lg"
-              radius="md"
-              className="mb-6 shadow-sm border border-blue-100 py-4 px-4 text-blue-600 font-bold tracking-wide"
-            >
-              NEW: MARUMORI MOBILE APP
-            </Badge>
+          <div className="flex flex-col gap-7 w-full md:w-[56%] animate-fadeInUp">
 
-            <div className="space-y-4">
-              <Title order={1} className="text-6xl md:text-8xl font-black text-gray-900 leading-[1] tracking-tight">
+            {/* Top badge */}
+            <div>
+              <Badge
+                variant="white"
+                color="blue"
+                size="md"
+                radius="md"
+                className="shadow-sm border border-blue-100/80 py-3 px-4 text-blue-600 font-semibold tracking-wide uppercase text-xs"
+              >
+                NEW: TORISHO MOBILE APP
+              </Badge>
+            </div>
+
+            {/* Headings */}
+            <div className="flex flex-col gap-1">
+              <Title
+                order={1}
+                className={`${displayFont.className} text-[52px] md:text-[64px] font-extrabold text-gray-900 leading-[1.05] tracking-tight`}
+              >
                 Your all-in-one
               </Title>
-              <Title order={1} className="text-6xl md:text-8xl font-black text-gray-900 leading-[1] tracking-tight">
+              <Title
+                order={1}
+                className={`${displayFont.className} text-[52px] md:text-[64px] font-extrabold text-gray-900 leading-[1.05] tracking-tight`}
+              >
                 platform for Japanese
               </Title>
-              <div className="h-32 md:h-40 flex items-center">
+              <div className="min-h-[80px] md:min-h-[90px] flex items-center mt-1">
                 <Text
                   component="span"
                   variant="gradient"
                   gradient={{ from: 'blue', to: 'cyan' }}
-                  className="text-[60px]! md:text-[80px] font-black inline-block tracking-tight"
+                  className={`${displayFont.className} text-[52px]! md:text-[64px]! font-extrabold inline-block leading-none tracking-tight`}
                 >
                   {displayText}
-                  <span className="animate-blink text-gray-400 font-light ml-2">|</span>
+                  <span className="animate-blink text-gray-300 font-thin ml-1">|</span>
                 </Text>
               </div>
             </div>
 
-            <Group className="pt-8" gap="lg">
+            {/* CTA Group */}
+            <Group gap="xl" align="center" className="flex-wrap">
               <Button
-                size="xl"
-                radius="xl"
+                component={Link}
+                href="/register"
+                size="lg"
+                radius="lg"
                 variant="gradient"
                 gradient={{ from: 'blue', to: 'cyan' }}
-                rightSection={<span className="text-xl">→</span>}
-                className="shadow-xl shadow-blue-500/20 hover:shadow-cyan-500/30 hover:scale-105 transition-all duration-300 font-bold"
+                rightSection={<span className="text-lg">→</span>}
+                className="cursor-pointer shadow-lg shadow-blue-500/25 hover:shadow-cyan-500/30 hover:scale-105 transition-all duration-200 font-bold"
                 styles={{
                   root: {
-                    height: '64px',
-                    paddingLeft: '48px',
-                    paddingRight: '48px',
-                    fontSize: '20px',
+                    height: '52px',
+                    paddingLeft: '32px',
+                    paddingRight: '32px',
+                    fontSize: '17px',
+                    borderRadius: '14px',
                   }
                 }}
               >
                 Start Learning
               </Button>
 
-              <Text c="dimmed" size="lg" fw={500} className="hidden sm:block">
-                - It's free to try!
+              <Text c="dimmed" size="lg" fw={600} className="hidden sm:block">
+                — It&apos;s free to try!
               </Text>
             </Group>
 
-            <Text c="dimmed" className="text-lg pt-4 font-medium">
+            {/* Sign in link */}
+            <Text c="dimmed" className="text-base font-semibold -mt-1">
               Already registered?{' '}
-              <Link href="/login" className="text-blue-500 hover:text-blue-600 hover:underline font-bold transition-colors">
+              <Link
+                href="/login"
+                className="text-blue-500 hover:text-blue-600 hover:underline font-extrabold transition-colors duration-150 cursor-pointer"
+              >
                 Sign in
               </Link>
             </Text>
           </div>
 
-          {/* Right Content - Bear Illustration */}
-          <div className="relative flex items-center justify-center flex-1 w-full max-w-xl">
-            <div className="relative w-full aspect-square">
-              {/* Background glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-300/20 via-yellow-200/20 to-red-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-
-              {/* Bear character */}
-              <div className="relative w-full h-full flex items-center justify-center">
-                <div className="text-[320px] md:text-[450px] leading-none transform hover:scale-105 hover:rotate-3 transition-transform duration-500 select-none drop-shadow-2xl">
-                  🐻
-                </div>
+          {/* Right Content – Chicken Mascot */}
+          <div className="relative flex w-full md:w-[44%] items-center justify-center shrink-0 animate-fadeInUp-delay-1">
+            <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px]">
+              {/* Glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-300/25 via-yellow-200/20 to-red-300/20 rounded-full blur-2xl animate-pulse" />
+              {/* Chicken mascot image */}
+              <div className="relative w-full h-full rounded-full overflow-hidden shadow-2xl border-8 border-white/50 cursor-pointer transform hover:scale-105 hover:rotate-3 transition-transform duration-500">
+                <Image
+                  src="/images/torisho-mascot-hero.png"
+                  alt="Torisho Mascot"
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
             </div>
           </div>
+
         </div>
       </Container>
     </section>

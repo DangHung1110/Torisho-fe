@@ -2,22 +2,31 @@
 import {
   Anchor,
   Button,
-  Checkbox,
   PasswordInput,
   Text,
   TextInput,
   Title,
-  Divider,
-  Stack,
-  Container,
   Alert,
   LoadingOverlay,
 } from '@mantine/core';
-import { IconBrandDiscord, IconBrandGoogle, IconInfoCircle } from '@tabler/icons-react';
+import { IconBrandDiscord, IconBrandGoogle, IconInfoCircle, IconChevronsRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '../services/auth.service';
+import Image from 'next/image';
+
+const inputClassNames = {
+  root: 'w-full',
+  label: 'mb-2 text-xs font-medium text-gray-400',
+  input:
+    '!h-12 !rounded-full border-0 bg-[var(--auth-input-bg)] px-5 text-[0.9375rem] text-gray-800 shadow-none transition-all placeholder:text-gray-400 focus:!border-transparent focus:!ring-2 focus:!ring-[var(--auth-input-focus)]',
+};
+
+const passwordClassNames = {
+  ...inputClassNames,
+  innerInput: 'h-12',
+};
 
 export function LoginForm() {
   const router = useRouter();
@@ -32,12 +41,11 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const result = await AuthService.login({ username, password });
-      // Token is now saved in localStorage by AuthService
-      // Redirect to adventure page on success
+      await AuthService.login({ username, password });
       router.push('/adventure');
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An error occurred during login';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -46,110 +54,121 @@ export function LoginForm() {
   const handleDiscordLogin = () => {
     AuthService.loginWithDiscord();
   };
-
   const handleGoogleLogin = () => {
     AuthService.loginWithGoogle();
   };
 
   return (
     <div className="flex min-h-screen w-full bg-white">
-      {/* Left Side: Form - 2/3 width */}
-      <div className="w-full lg:w-[67%] flex items-center justify-center p-8 md:p-12 lg:p-16">
-        <div className="w-full max-w-5xl flex flex-col">
+      {/* Left: form */}
+      <div className="flex w-full items-center justify-center px-6 py-12 md:px-10 lg:w-[56%] lg:min-w-0 lg:px-14 xl:px-16">
+        <div className="w-full max-w-[min(100%,680px)] xl:max-w-[720px]">
+          <Link href="/" className="group mb-10 flex w-fit items-center gap-2.5 no-underline">
+            <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full shadow-md">
+              <Image src="/images/torisho-logo.png" alt="Torisho" width={40} height={40} className="h-full w-full object-cover" />
+            </div>
+            <span className="text-xl font-bold text-gray-800 transition-colors group-hover:text-orange-500">Torisho</span>
+          </Link>
 
-          <Title order={1} className="text-gray-900 mb-10 !text-4xl md:!text-5xl font-extrabold tracking-tight">
+          <Title
+            order={1}
+            className="mb-10 text-[2rem] font-extrabold leading-tight tracking-tight text-gray-900 sm:text-[2.2rem]"
+          >
             Welcome back!
           </Title>
 
-          {/* Main Content: Inputs and Social Buttons Side by Side */}
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-            {/* Column 1: Input Fields */}
-            <div className="flex-1 w-full lg:w-auto lg:max-w-[500px] relative">
-              <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} loaderProps={{ color: 'blue', type: 'bars' }} />
-              <form onSubmit={handleLogin} className="flex flex-col gap-5">
-                {error && (
-                  <Alert variant="light" color="red" title="Login Failed" icon={<IconInfoCircle />}>
-                    {error}
-                  </Alert>
-                )}
-                <TextInput
-                  label="Username"
-                  placeholder="Your username"
-                  size="md"
-                  radius="md"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  classNames={{
-                    label: 'text-gray-900 font-semibold mb-1.5',
-                    input: 'bg-white border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all h-11',
-                  }}
-                />
-                <PasswordInput
-                  label="Password"
-                  placeholder="Your password"
-                  size="md"
-                  radius="md"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  classNames={{
-                    label: 'text-gray-900 font-semibold mb-1.5',
-                    input: 'bg-white border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all h-11',
-                  }}
-                />
+          {error && (
+            <Alert
+              variant="light"
+              color="red"
+              title="Login failed"
+              icon={<IconInfoCircle size={18} />}
+              radius="lg"
+              className="mb-6 border border-red-100 bg-red-50/50"
+            >
+              {error}
+            </Alert>
+          )}
 
-                <Checkbox
-                  label="Keep me logged in"
-                  size="md"
-                  className="mt-2"
-                  classNames={{
-                    label: 'text-gray-700 text-sm',
-                    input: 'border-gray-300 cursor-pointer',
-                  }}
-                />
+          <div className="relative">
+            <LoadingOverlay
+              visible={loading}
+              zIndex={1000}
+              overlayProps={{ radius: 'md', blur: 2 }}
+              loaderProps={{ color: 'blue', type: 'bars' }}
+            />
 
-                <Button
-                  fullWidth
-                  size="lg"
-                  radius="md"
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-600 mt-4 h-12 text-base font-bold shadow-lg shadow-blue-500/20 transition-all hover:shadow-xl hover:shadow-blue-500/30"
-                >
-                  Login
-                </Button>
-              </form>
-            </div>
+            <div className="flex flex-col items-stretch gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-14">
+              <div className="min-w-0 w-full flex-1">
+                <form onSubmit={handleLogin} className="flex flex-col gap-5">
+                  <TextInput
+                    label="Username / Email"
+                    placeholder="Your username or email"
+                    size="md"
+                    radius="xl"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    classNames={inputClassNames}
+                  />
+                  <PasswordInput
+                    label="Password"
+                    placeholder="••••••••"
+                    size="md"
+                    radius="xl"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    classNames={passwordClassNames}
+                  />
 
-            {/* Column 2: Social Login Buttons */}
-            <div className="w-full lg:w-[300px] flex flex-col justify-start items-center pt-0">
-              <Divider
-                label="Or continue with"
-                labelPosition="center"
-                my="sm"
-                className="mb-6 text-gray-500 font-normal w-full"
-                classNames={{ label: 'text-sm text-gray-500' }}
-              />
-              <div className="flex flex-col gap-3 w-full">
+                  <Button
+                    fullWidth
+                    type="submit"
+                    radius="xl"
+                    size="lg"
+                    rightSection={<IconChevronsRight size={18} stroke={1.5} />}
+                    className="mt-1 !h-[3.25rem] border-0 !bg-[var(--auth-primary)] text-base font-bold !text-white shadow-md shadow-blue-400/15 transition-all hover:!bg-[var(--auth-primary-hover)] hover:shadow-lg"
+                  >
+                    Sign in
+                  </Button>
+                </form>
+
+                <div className="mt-8 space-y-2">
+                  <Text size="sm" className="text-gray-500">
+                    No account yet?{' '}
+                    <Anchor component={Link} href="/register" fw={600} className="text-[var(--auth-primary)] hover:underline">
+                      Register now!
+                    </Anchor>
+                  </Text>
+                  <Text size="sm" className="text-gray-500">
+                    Forgot your password?{' '}
+                    <Anchor href="#" fw={600} className="text-[var(--auth-primary)] hover:underline">
+                      Reset
+                    </Anchor>
+                  </Text>
+                </div>
+              </div>
+
+              <div className="flex w-full flex-col gap-3 lg:w-[240px] lg:flex-none lg:shrink-0 lg:pt-[9.5rem]">
                 <Button
                   variant="default"
-                  leftSection={<IconBrandDiscord size={18} className="text-[#5865F2]" />}
-                  fullWidth
+                  leftSection={<IconBrandDiscord size={20} className="text-[#5865F2]" />}
+                  radius="xl"
                   size="md"
-                  radius="md"
-                  className="bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700 font-medium h-11 transition-colors"
+                  fullWidth
+                  className="h-12 border border-gray-200/80 bg-[var(--auth-input-bg)] font-medium text-gray-700 hover:bg-gray-200/90"
                   onClick={handleDiscordLogin}
                 >
                   Continue with Discord
                 </Button>
-
                 <Button
                   variant="default"
-                  leftSection={<IconBrandGoogle size={18} />}
-                  fullWidth
+                  leftSection={<IconBrandGoogle size={20} />}
+                  radius="xl"
                   size="md"
-                  radius="md"
-                  className="bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700 font-medium h-11 transition-colors"
+                  fullWidth
+                  className="h-12 border border-gray-200/80 bg-[var(--auth-input-bg)] font-medium text-gray-700 hover:bg-gray-200/90"
                   onClick={handleGoogleLogin}
                 >
                   Continue with Google
@@ -157,24 +176,19 @@ export function LoginForm() {
               </div>
             </div>
           </div>
-
-          <Text ta="left" mt="xl" className="text-gray-600 mt-8 text-sm">
-            Don&apos;t have an account?{' '}
-            <Anchor component={Link} href="/register" fw={600} c="blue" className="text-blue-500 hover:text-blue-600">
-              Register
-            </Anchor>
-          </Text>
         </div>
       </div>
 
-      {/* Right Side: Background - 1/3 width */}
-      <div className="hidden lg:block w-[33%] relative bg-[#062343]">
-        <div className="relative h-full flex items-center justify-center p-12 text-center">
-          {/* Decorative text - Torisho */}
-          <div className="text-9xl font-black rotate-12 select-none text-white/10 opacity-60">
-            Torisho
-          </div>
-        </div>
+      {/* Right: illustration */}
+      <div className="relative hidden min-h-screen flex-1 overflow-hidden lg:block">
+        <Image
+          src="/images/torisho-auth-bg.png"
+          alt="Torisho Mascot"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-white via-white/85 to-transparent sm:w-32 md:w-40" />
       </div>
     </div>
   );

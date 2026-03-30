@@ -5,6 +5,11 @@
   --background: #ffffff;
   --foreground: #171717;
   --font-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Auth / sample-style (MaruMori-like) */
+  --auth-primary: #6eb8ea;
+  --auth-primary-hover: #5aa8dc;
+  --auth-input-bg: #f3f4f6;
+  --auth-input-focus: rgba(110, 184, 234, 0.35);
 }
 
 @theme inline {
@@ -39,38 +44,98 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* ─── Custom scrollbar ─────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 5px;
+  background: #d1d5db;
+  border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #9ca3af;
 }
 
-/* Typing cursor animation */
+/* ─── Typing cursor animation ─────────────────────── */
 @keyframes blink {
-
-  0%,
-  50% {
-    opacity: 1;
-  }
-
-  51%,
-  100% {
-    opacity: 0;
-  }
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 .animate-blink {
   animation: blink 1s infinite;
+}
+
+/* ─── Fade-in-up entrance animation ──────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.7s ease both;
+}
+
+.animate-fadeInUp-delay-1 {
+  animation: fadeInUp 0.7s 0.15s ease both;
+}
+
+.animate-fadeInUp-delay-2 {
+  animation: fadeInUp 0.7s 0.3s ease both;
+}
+
+/* ─── Gradient text utility ───────────────────────── */
+.gradient-text-orange {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Shimmer / active-tile pulse ───────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer-border {
+  position: relative;
+}
+
+.shimmer-border::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  z-index: -1;
+}
+
+/* ─── Glass card utility ─────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
