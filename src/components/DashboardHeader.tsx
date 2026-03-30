@@ -20,6 +20,7 @@ export default function DashboardHeader() {
   const [opened, setOpened] = useState(false);
   const [speakingModalOpened, setSpeakingModalOpened] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<JLPTLevel | null>(null);
+  const [dictionaryKeyword, setDictionaryKeyword] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState('');
   const { user, logout } = useAuth();
@@ -113,6 +114,15 @@ export default function DashboardHeader() {
 
   const displayInitial =
     user?.username?.charAt(0)?.toUpperCase() ?? user?.email?.charAt(0)?.toUpperCase() ?? '?';
+
+  const handleDictionarySearch = () => {
+    const keyword = dictionaryKeyword.trim();
+    if (!keyword) {
+      return;
+    }
+
+    router.push(`/dictionary?keyword=${encodeURIComponent(keyword)}`);
+  };
 
   return (
     <>
@@ -208,7 +218,7 @@ export default function DashboardHeader() {
               </button>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item>Dictionary</Menu.Item>
+              <Menu.Item onClick={() => router.push('/dictionary')}>Dictionary</Menu.Item>
               <Menu.Item>Grammar</Menu.Item>
               <Menu.Item>Kanji</Menu.Item>
             </Menu.Dropdown>
@@ -219,7 +229,24 @@ export default function DashboardHeader() {
         <div className="flex shrink-0 items-center justify-end gap-3 sm:gap-4 md:gap-5">
           <TextInput
             placeholder="Search Dictionary..."
-            rightSection={<IconSearch size={16} className="text-gray-400" stroke={1.5} />}
+            value={dictionaryKeyword}
+            onChange={(event) => setDictionaryKeyword(event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                handleDictionarySearch();
+              }
+            }}
+            rightSection={
+              <button
+                type="button"
+                onClick={handleDictionarySearch}
+                className="flex h-7 w-7 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                aria-label="Search dictionary"
+              >
+                <IconSearch size={16} stroke={1.75} />
+              </button>
+            }
             radius="xl"
             size="sm"
             className="hidden w-[200px] sm:block lg:w-[240px]"
