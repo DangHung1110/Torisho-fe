@@ -10,8 +10,8 @@ if (process.env.NODE_ENV === 'development') {
 
 
 export const metadata: Metadata = {
-  title: "MaruMori - Japanese Learning Platform",
-  description: "Your all-in-one platform for Japanese Grammar Lessons",
+  title: "Torisho - Japanese Learning Platform",
+  description: "Your all-in-one platform for mastering Japanese",
 };
 
 export default function RootLayout({

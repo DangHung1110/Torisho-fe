@@ -23,6 +23,11 @@ export class AuthService {
     if (result.user) AuthStorage.setUser(result.user);
     AuthStorage.cleanupLegacyKeys();
     
+    // Notify auth state change
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('auth-change'));
+    }
+    
     return result;
   }
 
@@ -62,9 +67,13 @@ export class AuthService {
     
     AuthStorage.clearAll();
     
-    // Redirect to home page after logout
+    // Notify auth state change
     if (typeof window !== 'undefined') {
-      window.location.href = '/';
+      window.dispatchEvent(new Event('auth-change'));
+      // Small delay to ensure state is cleared before redirect
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     }
   }
 
