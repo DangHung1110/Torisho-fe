@@ -1,3 +1,4 @@
+// src/components/DashboardHeader.tsx
 'use client';
 
 import { Burger, TextInput, Menu, Avatar, Text, Modal, Button, Stack, Group } from '@mantine/core';
@@ -168,8 +169,8 @@ export default function DashboardHeader() {
       </Modal>
 
       <header className="sticky top-0 z-50 w-full bg-transparent pb-2 pt-3 sm:pt-4">
-      <div className="flex w-full justify-center px-6! sm:px-8! lg:px-10!">
-        <div className="flex h-16 w-full max-w-[1040px] items-center gap-5 rounded-2xl border border-gray-100/90 bg-white/95 px-6! shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-md supports-backdrop-filter:bg-white/90 sm:gap-6 sm:px-8! lg:px-10!">
+      <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
+        <div className="flex h-16 w-full max-w-[1040px] items-center gap-5 rounded-2xl border border-gray-100/90 bg-white/95 px-6 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-md supports-backdrop-filter:bg-white/90 sm:gap-6 sm:px-8 lg:px-10">
         {/* Left: brand */}
         <Link href="/" className="group flex shrink-0 items-center gap-3 no-underline">
           <div className="h-10 w-10 overflow-hidden rounded-full shadow-md transition-transform duration-300 group-hover:rotate-12">
