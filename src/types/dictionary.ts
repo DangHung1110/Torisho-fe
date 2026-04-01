@@ -3,6 +3,7 @@ export interface WordSearchResult {
   kanji: string | null;
   kana: string;
   primaryMeaning: string;
+  isCommon: boolean;
 }
 
 export interface WordExample {
