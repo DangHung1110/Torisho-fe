@@ -60,7 +60,7 @@ function WordCard({ word }: { word: WordDetail }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
           </svg>
-          Save
+          Save to flashcard
         </button>
       </div>
     </div>
@@ -144,102 +144,89 @@ export default function WordDetailPage() {
     <div className="min-h-screen bg-slate-50 text-slate-800">
       <DashboardHeader />
 
-      <main className="w-full pb-16 pt-8">
+      <main className="w-full pb-20 pt-8">
         <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
-          <div className="w-full max-w-[1040px]">
-            {/* ── Centered container ── */}
-            <div className="flex w-full justify-center">
-              <div className="w-full max-w-3xl">
+          <div className="w-full max-w-5xl">
+            <Link
+              href={backHref}
+              className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 transition hover:text-slate-700"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              Back to results
+            </Link>
 
-                {/* Back link */}
-                <Link
-                  href={backHref}
-                  className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 transition hover:text-slate-700"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 18l-6-6 6-6" />
-                  </svg>
-                  Back to results
-                </Link>
+            {isLoading ? (
+              <DetailSkeleton />
+            ) : error ? (
+              <div className="rounded-2xl bg-rose-50 p-6 text-center text-sm text-rose-600">{error}</div>
+            ) : !word ? null : (
+              <div className="mx-auto grid w-full items-start gap-12 lg:grid-cols-[260px_minmax(0,1fr)]">
+                {/* ── Left: Word Card ── */}
+                <aside className="lg:sticky lg:top-8 lg:self-start">
+                  <WordCard word={word} />
+                </aside>
 
-                {isLoading ? (
-                  <DetailSkeleton />
-                ) : error ? (
-                  <div className="rounded-2xl bg-rose-50 p-6 text-center text-sm text-rose-600">{error}</div>
-                ) : !word ? null : (
-                  <div className="mx-auto grid w-full gap-8 lg:grid-cols-[220px_minmax(0,1fr)]">
+                {/* ── Right: Detail ── */}
+                <div className="w-full space-y-12 pt-2">
+                  {/* Definitions */}
+                  <section>
+                    <h2 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                      Meanings
+                    </h2>
+                    <div className="space-y-8">
+                      {word.senses.map((sense, si) => (
+                        <div key={si} className="space-y-3">
+                          <div className="flex flex-wrap gap-2">
+                            {sense.partsOfSpeech.map((pos, pi) => (
+                              <span
+                                key={pi}
+                                className="rounded-md bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-600"
+                              >
+                                {getPosLabel(pos)}
+                              </span>
+                            ))}
+                          </div>
+                          <ul className="space-y-3">
+                            {sense.glosses.map((gloss, gi) => (
+                              <li key={gi} className="flex items-start gap-3.5 text-[16px] text-slate-700">
+                                <span className="mt-0.5 flex h-6 min-w-[24px] shrink-0 items-center justify-center rounded-full bg-slate-200/70 text-[11px] font-bold text-slate-500">
+                                  {gi + 1}
+                                </span>
+                                <span className="leading-relaxed">{gloss}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
 
-                    {/* ── Left: Word Card ── */}
-                    <aside className="lg:sticky lg:top-8 lg:self-start">
-                      <WordCard word={word} />
-                    </aside>
-
-                  {/* ── Right: Detail ── */}
-                  <div className="space-y-8">
-
-              {/* Definitions */}
-              <section>
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                  Definitions
-                </p>
-                <div className="space-y-3">
-                  {word.senses.map((sense, si) => (
-                    <div
-                      key={si}
-                      className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-                    >
-                      <div className="mb-3 flex flex-wrap gap-1.5">
-                        {sense.partsOfSpeech.map((pos, pi) => (
-                          <span
-                            key={pi}
-                            className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700"
+                  {/* Example sentences */}
+                  {word.examples.length > 0 && (
+                    <section>
+                      <h2 className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                        Example sentences
+                      </h2>
+                      <div className="space-y-4">
+                        {word.examples.map((ex, i) => (
+                          <div
+                            key={i}
+                            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
                           >
-                            {getPosLabel(pos)}
-                          </span>
+                            <p className={`${notoSansJp.className} text-[17px] font-medium leading-relaxed text-slate-800`}>
+                              {ex.japanese}
+                            </p>
+                            <p className="mt-2.5 text-[15px] text-slate-500">{ex.english}</p>
+                          </div>
                         ))}
                       </div>
-                      <ol className="space-y-2">
-                        {sense.glosses.map((gloss, gi) => (
-                          <li key={gi} className="flex items-baseline gap-3 text-sm text-slate-700">
-                            <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-slate-100 px-1 text-[10px] font-bold text-slate-400">
-                              {gi + 1}
-                            </span>
-                            {gloss}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  ))}
+                    </section>
+                  )}
                 </div>
-              </section>
-
-              {/* Example sentences */}
-              {word.examples.length > 0 && (
-                <section>
-                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                    Example sentences
-                  </p>
-                  <div className="space-y-3">
-                    {word.examples.map((ex, i) => (
-                      <div
-                        key={i}
-                        className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-                      >
-                        <p className={`${notoSansJp.className} text-lg font-medium leading-relaxed text-slate-800`}>
-                          {ex.japanese}
-                        </p>
-                        <p className="mt-2 text-sm italic text-slate-400">{ex.english}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>
