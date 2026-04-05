@@ -1,5 +1,10 @@
 import { api } from '../libs/api-client';
-import { WordDetail, WordSearchResult } from '../types/dictionary';
+import {
+	CreateDictionaryCommentRequest,
+	DictionaryComment,
+	WordDetail,
+	WordSearchResult,
+} from '../types/dictionary';
 
 const DICTIONARY_ENDPOINT = '/dictionary';
 
@@ -21,6 +26,25 @@ export const dictionaryService = {
 		return api.get<WordDetail>(`${DICTIONARY_ENDPOINT}/${id}`, {
 			requiresAuth: false,
 		});
+	},
+
+	async createComment(
+		id: string,
+		request: CreateDictionaryCommentRequest
+	): Promise<DictionaryComment> {
+		const content = request.content.trim();
+		if (!content) {
+			throw new Error('Comment content is required');
+		}
+
+		return api.post<DictionaryComment>(
+			`${DICTIONARY_ENDPOINT}/${id}/comments`,
+			{
+				content,
+				parentCommentId: request.parentCommentId ?? null,
+			},
+			{ requiresAuth: true }
+		);
 	},
 };
 

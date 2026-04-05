@@ -16,11 +16,31 @@ export interface WordSense {
   glosses: string[];
 }
 
+export interface DictionaryComment {
+  id: string;
+  userId: string;
+  userFullName: string;
+  userAvatarUrl: string | null;
+  content: string;
+  isEdited: boolean;
+  isDeleted: boolean;
+  parentCommentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  replies: DictionaryComment[];
+}
+
+export interface CreateDictionaryCommentRequest {
+  content: string;
+  parentCommentId?: string | null;
+}
+
 export interface WordDetail {
   id: string;
   kanji: string | null;
   kana: string;
   isCommon: boolean;
+  comments: DictionaryComment[];
   examples: WordExample[];
   senses: WordSense[];
 }
