@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Noto_Sans_JP } from 'next/font/google';
 import { useParams, useSearchParams } from 'next/navigation';
 import DashboardHeader from '../../../src/components/DashboardHeader';
+import CommentSection from '../../../src/components/Dictionary/CommentSection';
+import { useAuth } from '../../../src/libs/useAuth';
 import { dictionaryService } from '../../../src/services/dictionary.service';
 import { WordDetail } from '../../../src/types/dictionary';
 import { POS_MAP } from '../../../src/constants/pos_map';
@@ -102,6 +104,7 @@ function DetailSkeleton() {
 
 // ─── Page ───────────────────────────────────────────────────────────────────
 export default function WordDetailPage() {
+  const { user } = useAuth();
   const params = useParams<{ id: string | string[] }>();
   const searchParams = useSearchParams();
   const rawWordId = params?.id;
@@ -112,6 +115,14 @@ export default function WordDetailPage() {
   const [word, setWord] = useState<WordDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const currentUser = user
+    ? {
+        id: user.id,
+        fullName: user.username || user.email,
+        avatarUrl: user.avatarUrl ?? null,
+      }
+    : null;
 
   useEffect(() => {
     let active = true;
@@ -213,17 +224,26 @@ export default function WordDetailPage() {
                         {word.examples.map((ex, i) => (
                           <div
                             key={i}
-                            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                            className="rounded-lg border border-slate-200 bg-white px-7 py-5 shadow-sm transition-shadow hover:shadow-md"
                           >
                             <p className={`${notoSansJp.className} text-[17px] font-medium leading-relaxed text-slate-800`}>
                               {ex.japanese}
                             </p>
-                            <p className="mt-2.5 text-[15px] text-slate-500">{ex.english}</p>
+                            <p className="mt-3 text-[15px] leading-relaxed text-slate-500">{ex.english}</p>
                           </div>
                         ))}
                       </div>
                     </section>
                   )}
+
+                  <section>
+                    <CommentSection
+                      wordId={word.id}
+                      currentUser={currentUser}
+                      fetchComments={dictionaryService.getComments}
+                      postComment={dictionaryService.postComment}
+                    />
+                  </section>
                 </div>
               </div>
             )}

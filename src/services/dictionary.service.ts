@@ -8,6 +8,18 @@ import {
 
 const DICTIONARY_ENDPOINT = '/dictionary';
 
+function buildCommentPayload(request: CreateDictionaryCommentRequest) {
+	const content = request.content.trim();
+	if (!content) {
+		throw new Error('Comment content is required');
+	}
+
+	return {
+		content,
+		parentCommentId: request.parentCommentId ?? null,
+	};
+}
+
 export const dictionaryService = {
 	async search(keyword: string): Promise<WordSearchResult[]> {
 		const trimmedKeyword = keyword.trim();
@@ -28,21 +40,32 @@ export const dictionaryService = {
 		});
 	},
 
+	async getComments(id: string): Promise<DictionaryComment[]> {
+		const detail = await api.get<WordDetail>(`${DICTIONARY_ENDPOINT}/${id}`, {
+			requiresAuth: false,
+		});
+
+		return detail.comments ?? [];
+	},
+
+	async postComment(
+		id: string,
+		request: CreateDictionaryCommentRequest
+	): Promise<DictionaryComment> {
+		return api.post<DictionaryComment>(
+			`${DICTIONARY_ENDPOINT}/${id}/comments`,
+			buildCommentPayload(request),
+			{ requiresAuth: true }
+		);
+	},
+
 	async createComment(
 		id: string,
 		request: CreateDictionaryCommentRequest
 	): Promise<DictionaryComment> {
-		const content = request.content.trim();
-		if (!content) {
-			throw new Error('Comment content is required');
-		}
-
 		return api.post<DictionaryComment>(
 			`${DICTIONARY_ENDPOINT}/${id}/comments`,
-			{
-				content,
-				parentCommentId: request.parentCommentId ?? null,
-			},
+			buildCommentPayload(request),
 			{ requiresAuth: true }
 		);
 	},
