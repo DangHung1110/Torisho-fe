@@ -66,3 +66,53 @@ export interface UserLeft {
   username: string;
   leftAt: string;
 }
+
+export interface JoinedRoomEvent {
+  connectionId: string;
+  userId: string;
+  username: string;
+}
+
+export interface PeerJoinedEvent {
+  connectionId: string;
+  userId: string;
+  username: string;
+  joinedAt: string;
+}
+
+export interface PeerDisconnectedEvent {
+  connectionId: string;
+  userId: string;
+  username: string;
+  leftAt: string;
+}
+
+export interface SignalOfferEvent {
+  fromConnectionId: string;
+  fromUserId: string;
+  fromUsername: string;
+  sdp: string;
+}
+
+export interface SignalAnswerEvent {
+  fromConnectionId: string;
+  fromUserId: string;
+  fromUsername: string;
+  sdp: string;
+}
+
+export interface SignalIceCandidateEvent {
+  fromConnectionId: string;
+  fromUserId: string;
+  fromUsername: string;
+  candidate: string;
+}
+
+export interface PeerMediaStateChangedEvent {
+  connectionId: string;
+  userId: string;
+  username: string;
+  isMicOn: boolean;
+  isCameraOn: boolean;
+  updatedAt: string;
+}
