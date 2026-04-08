@@ -35,6 +35,10 @@ export interface CreateDictionaryCommentRequest {
   parentCommentId?: string | null;
 }
 
+export interface UpdateDictionaryCommentRequest {
+  content: string;
+}
+
 export interface WordDetail {
   id: string;
   kanji: string | null;

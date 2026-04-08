@@ -242,6 +242,7 @@ export default function WordDetailPage() {
                       currentUser={currentUser}
                       fetchComments={dictionaryService.getComments}
                       postComment={dictionaryService.postComment}
+                      updateComment={dictionaryService.updateComment}
                     />
                   </section>
                 </div>
