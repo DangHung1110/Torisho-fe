@@ -13,6 +13,8 @@
     "@mantine/hooks": "^8.3.12",
     "@microsoft/signalr": "^10.0.0",
     "@tabler/icons-react": "^3.36.1",
+    "hanzi-writer": "^3.7.3",
+    "lucide-react": "^1.8.0",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
