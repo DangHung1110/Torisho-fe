@@ -2,7 +2,6 @@ export interface KanjiRelatedWord {
   dictionaryEntryId: string;
   keyword: string;
   reading: string;
-  shortGloss: string;
 }
 
 export interface KanjiDetail {
