@@ -23,7 +23,13 @@ function getPosLabel(pos: string) {
 }
 
 // ─── Left panel: Word card ──────────────────────────────────────────────────
-function WordCard({ word }: { word: WordDetail }) {
+function WordCard({
+  word,
+  onKanjiClick,
+}: {
+  word: WordDetail;
+  onKanjiClick: (char: string) => void;
+}) {
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Blue flash card */}
@@ -51,6 +57,30 @@ function WordCard({ word }: { word: WordDetail }) {
           <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700 ring-1 ring-inset ring-emerald-200">
             Common Word
           </span>
+        </div>
+      )}
+
+      {/* Kanji in this word */}
+      {word?.kanji && (
+        <div className="w-full">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+            Kanji in this word
+          </p>
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from(new Set(Array.from(word.kanji).filter((c) => /[\u4E00-\u9FFF]/.test(c)))).map((ch) => (
+              <button
+                key={ch}
+                type="button"
+                onClick={() => onKanjiClick(ch)}
+                className="group relative flex aspect-square items-center justify-center rounded-xl border-2 border-slate-100 bg-white shadow-sm transition-all hover:border-blue-400 hover:text-blue-600 hover:shadow-md active:scale-95"
+              >
+                <span className={`${notoSansJp.className} text-3xl font-bold`}>
+                  {ch}
+                </span>
+                <div className="absolute bottom-1 h-1 w-1 rounded-full bg-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -178,25 +208,10 @@ export default function WordDetailPage() {
               <div className="mx-auto grid w-full items-start gap-12 lg:grid-cols-[260px_minmax(0,1fr)]">
                 {/* ── Left: Word Card ── */}
                 <aside className="lg:sticky lg:top-8 lg:self-start">
-                  <WordCard word={word} />
-                  {/* Kanji list (clickable) */}
-                  {word?.kanji && (
-                    <div className="mt-4 w-full">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Kanji</p>
-                      <div className="flex flex-wrap gap-2">
-                        {Array.from(new Set(Array.from(word.kanji).filter((c) => /[\u4E00-\u9FFF]/.test(c)))).map((ch) => (
-                          <button
-                            key={ch}
-                            type="button"
-                            onClick={() => setSelectedKanji(ch)}
-                            className="inline-flex items-center justify-center rounded-md border border-slate-100 bg-white px-3 py-1 text-lg font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
-                          >
-                            {ch}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <WordCard
+                    word={word}
+                    onKanjiClick={(ch) => setSelectedKanji(ch)}
+                  />
                 </aside>
 
                 {/* ── Right: Detail ── */}
