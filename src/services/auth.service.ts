@@ -1,9 +1,19 @@
-import { LoginRequest, RegisterRequest, AuthResponse } from '../types/auth';
+import { LoginRequest, RegisterRequest, AuthResponse, ExternalLoginRequest } from '../types/auth';
 import { AuthStorage } from '../libs/auth-storage';
 
-const API_URL = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:5118/api';
+const API_URL = process.env.NEXT_PUBLIC_BE_URL;
 
 export class AuthService {
+  private static persistAuthSession(result: AuthResponse): void {
+    if (result.accessToken) AuthStorage.setAccessToken(result.accessToken);
+    if (result.user) AuthStorage.setUser(result.user);
+    AuthStorage.cleanupLegacyKeys();
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('auth-change'));
+    }
+  }
+
   static async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
@@ -19,15 +29,27 @@ export class AuthService {
 
     const result: AuthResponse = await response.json();
     
-    if (result.accessToken) AuthStorage.setAccessToken(result.accessToken);
-    if (result.user) AuthStorage.setUser(result.user);
-    AuthStorage.cleanupLegacyKeys();
+    this.persistAuthSession(result);
     
-    // Notify auth state change
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('auth-change'));
+    return result;
+  }
+
+  static async externalLogin(data: ExternalLoginRequest): Promise<AuthResponse> {
+    const response = await fetch(`${API_URL}/auth/external-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'External login failed');
     }
-    
+
+    const result: AuthResponse = await response.json();
+    this.persistAuthSession(result);
+
     return result;
   }
 
@@ -94,6 +116,18 @@ export class AuthService {
   }
 
   static loginWithGoogle() {
-    window.location.href = `${API_URL}/auth/google`;
+    if (typeof window === 'undefined') return;
+
+    const state = crypto.randomUUID();
+    const nonce = crypto.randomUUID();
+
+    sessionStorage.setItem('google_oauth_state', state);
+    sessionStorage.setItem('google_oauth_nonce', nonce);
+
+    const oauthStartUrl = new URL('/api/auth/google', window.location.origin);
+    oauthStartUrl.searchParams.set('state', state);
+    oauthStartUrl.searchParams.set('nonce', nonce);
+
+    window.location.href = oauthStartUrl.toString();
   }
 }
