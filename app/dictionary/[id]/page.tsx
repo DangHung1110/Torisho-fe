@@ -1,7 +1,7 @@
 // app/dictionary/[id]/page.tsx  ← Word Detail Page
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Noto_Sans_JP } from 'next/font/google';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -134,7 +134,7 @@ function DetailSkeleton() {
 }
 
 // ─── Page ───────────────────────────────────────────────────────────────────
-export default function WordDetailPage() {
+function WordDetailPageContent() {
   const { user } = useAuth();
   const params = useParams<{ id: string | string[] }>();
   const searchParams = useSearchParams();
@@ -288,5 +288,29 @@ export default function WordDetailPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function WordDetailPageFallback() {
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800">
+      <DashboardHeader />
+
+      <main className="w-full pb-20 pt-8">
+        <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
+          <div className="w-full max-w-5xl">
+            <DetailSkeleton />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function WordDetailPage() {
+  return (
+    <Suspense fallback={<WordDetailPageFallback />}>
+      <WordDetailPageContent />
+    </Suspense>
   );
 }

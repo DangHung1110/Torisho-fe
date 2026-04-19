@@ -679,7 +679,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
                             <div>
                               <Group gap={6} mb={4}>
                                 <Text size="xs" fw={600} c="dark.7">{msg.username}</Text>
-                                <Text size={10} c="dimmed">
+                                <Text size="xs" c="dimmed">
                                   {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </Text>
                               </Group>

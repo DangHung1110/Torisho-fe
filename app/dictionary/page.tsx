@@ -1,7 +1,7 @@
 // app/dictionary/page.tsx  ← Search Results Page
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Noto_Sans_JP } from 'next/font/google';
@@ -86,7 +86,7 @@ function SearchSkeleton() {
 }
 
 // ─── Page ───────────────────────────────────────────────────────────────────
-export default function DictionarySearchPage() {
+function DictionarySearchPageContent() {
   const searchParams = useSearchParams();
   const keyword = useMemo(() => searchParams.get('keyword')?.trim() ?? '', [searchParams]);
 
@@ -190,5 +190,33 @@ export default function DictionarySearchPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function DictionarySearchPageFallback() {
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800">
+      <DashboardHeader />
+
+      <main className="w-full pb-16 pt-8">
+        <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
+          <div className="w-full max-w-[1040px]">
+            <div className="flex w-full justify-center">
+              <div className="w-full max-w-2xl">
+                <SearchSkeleton />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function DictionarySearchPage() {
+  return (
+    <Suspense fallback={<DictionarySearchPageFallback />}>
+      <DictionarySearchPageContent />
+    </Suspense>
   );
 }
