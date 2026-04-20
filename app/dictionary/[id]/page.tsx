@@ -1,12 +1,13 @@
 // app/dictionary/[id]/page.tsx  ← Word Detail Page
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Noto_Sans_JP } from 'next/font/google';
 import { useParams, useSearchParams } from 'next/navigation';
 import DashboardHeader from '../../../src/components/DashboardHeader';
 import CommentSection from '../../../src/components/Dictionary/CommentSection';
+import KanjiModal from '../../../src/components/Dictionary/KanjiModal';
 import { useAuth } from '../../../src/libs/useAuth';
 import { dictionaryService } from '../../../src/services/dictionary.service';
 import { WordDetail } from '../../../src/types/dictionary';
@@ -22,7 +23,13 @@ function getPosLabel(pos: string) {
 }
 
 // ─── Left panel: Word card ──────────────────────────────────────────────────
-function WordCard({ word }: { word: WordDetail }) {
+function WordCard({
+  word,
+  onKanjiClick,
+}: {
+  word: WordDetail;
+  onKanjiClick: (char: string) => void;
+}) {
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Blue flash card */}
@@ -50,6 +57,30 @@ function WordCard({ word }: { word: WordDetail }) {
           <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700 ring-1 ring-inset ring-emerald-200">
             Common Word
           </span>
+        </div>
+      )}
+
+      {/* Kanji in this word */}
+      {word?.kanji && (
+        <div className="w-full">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+            Kanji in this word
+          </p>
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from(new Set(Array.from(word.kanji).filter((c) => /[\u4E00-\u9FFF]/.test(c)))).map((ch) => (
+              <button
+                key={ch}
+                type="button"
+                onClick={() => onKanjiClick(ch)}
+                className="group relative flex aspect-square items-center justify-center rounded-xl border-2 border-slate-100 bg-white shadow-sm transition-all hover:border-blue-400 hover:text-blue-600 hover:shadow-md active:scale-95"
+              >
+                <span className={`${notoSansJp.className} text-3xl font-bold`}>
+                  {ch}
+                </span>
+                <div className="absolute bottom-1 h-1 w-1 rounded-full bg-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -103,7 +134,7 @@ function DetailSkeleton() {
 }
 
 // ─── Page ───────────────────────────────────────────────────────────────────
-export default function WordDetailPage() {
+function WordDetailPageContent() {
   const { user } = useAuth();
   const params = useParams<{ id: string | string[] }>();
   const searchParams = useSearchParams();
@@ -115,6 +146,7 @@ export default function WordDetailPage() {
   const [word, setWord] = useState<WordDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedKanji, setSelectedKanji] = useState<string | null>(null);
 
   const currentUser = user
     ? {
@@ -176,7 +208,10 @@ export default function WordDetailPage() {
               <div className="mx-auto grid w-full items-start gap-12 lg:grid-cols-[260px_minmax(0,1fr)]">
                 {/* ── Left: Word Card ── */}
                 <aside className="lg:sticky lg:top-8 lg:self-start">
-                  <WordCard word={word} />
+                  <WordCard
+                    word={word}
+                    onKanjiClick={(ch) => setSelectedKanji(ch)}
+                  />
                 </aside>
 
                 {/* ── Right: Detail ── */}
@@ -242,14 +277,40 @@ export default function WordDetailPage() {
                       currentUser={currentUser}
                       fetchComments={dictionaryService.getComments}
                       postComment={dictionaryService.postComment}
+                      updateComment={dictionaryService.updateComment}
                     />
                   </section>
                 </div>
               </div>
             )}
+            <KanjiModal character={selectedKanji} onClose={() => setSelectedKanji(null)} />
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+function WordDetailPageFallback() {
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800">
+      <DashboardHeader />
+
+      <main className="w-full pb-20 pt-8">
+        <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
+          <div className="w-full max-w-5xl">
+            <DetailSkeleton />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function WordDetailPage() {
+  return (
+    <Suspense fallback={<WordDetailPageFallback />}>
+      <WordDetailPageContent />
+    </Suspense>
   );
 }

@@ -22,5 +22,11 @@ export interface User {
 export interface AuthResponse {
     accessToken: string;
     refreshToken?: string;
+    expiration?: string;
     user: User;
+}
+
+export interface ExternalLoginRequest {
+    provider: string;
+    providerToken: string;
 }

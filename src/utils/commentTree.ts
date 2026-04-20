@@ -59,3 +59,14 @@ export function insertCommentIntoTree(
   const flat = [...flattenCommentTree(existing), { ...created, replies: [] }];
   return buildCommentTree(flat);
 }
+
+export function updateCommentInTree(
+  existing: DictionaryComment[],
+  updated: DictionaryComment,
+): DictionaryComment[] {
+  const flat = flattenCommentTree(existing).map((comment) => (
+    comment.id === updated.id ? { ...updated, replies: [] } : comment
+  ));
+
+  return buildCommentTree(flat);
+}

@@ -1,21 +1,31 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
 	CreateDictionaryCommentRequest,
 	DictionaryComment,
+	UpdateDictionaryCommentRequest,
 } from '../../types/dictionary';
 import {
 	buildCommentTree,
 	flattenCommentTree,
 	insertCommentIntoTree,
+	updateCommentInTree,
 } from '../../utils/commentTree';
 import {
 	formatCommentTime,
 	getAvatarColour,
 	getUserInitial,
 } from '../../utils/formatTime';
+import {
+	applyMarkdownAction,
+	getMarkdownActionFromShortcut,
+	type MarkdownToolbarAction,
+	normalizeLegacyCommentContent,
+} from '../../utils/commentMarkdown';
+import CommentMarkdown from './CommentMarkdown';
+import MarkdownToolbar from './MarkdownToolbar';
 
 export interface CommentSectionCurrentUser {
 	id: string;
@@ -31,16 +41,24 @@ interface CommentSectionProps {
 		wordId: string,
 		request: CreateDictionaryCommentRequest
 	) => Promise<DictionaryComment>;
+	updateComment: (
+		wordId: string,
+		commentId: string,
+		request: UpdateDictionaryCommentRequest
+	) => Promise<DictionaryComment>;
 }
 
 interface ComposeBoxProps {
 	currentUser: CommentSectionCurrentUser | null;
 	placeholder: string;
 	submitLabel: string;
+	submittingLabel?: string;
 	isSubmitting: boolean;
 	onSubmit: (content: string) => Promise<void>;
 	onCancel?: () => void;
 	compact?: boolean;
+	initialContent?: string;
+	autoFocus?: boolean;
 }
 
 interface UserAvatarProps {
@@ -75,23 +93,67 @@ function ComposeBox({
 	currentUser,
 	placeholder,
 	submitLabel,
+	submittingLabel = 'Posting...',
 	isSubmitting,
 	onSubmit,
 	onCancel,
 	compact = false,
+	initialContent = '',
+	autoFocus,
 }: ComposeBoxProps) {
-	const [content, setContent] = useState('');
-	const trimmedContent = content.trim();
+	const normalizedInitialContent = useMemo(
+		() => normalizeLegacyCommentContent(initialContent),
+		[initialContent],
+	);
+	const [content, setContent] = useState(normalizedInitialContent);
+	const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+	const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+	const preparedContent = useMemo(
+		() => normalizeLegacyCommentContent(content).trim(),
+		[content],
+	);
+
+	useEffect(() => {
+		setContent(normalizedInitialContent);
+		setIsPreviewVisible(false);
+	}, [normalizedInitialContent]);
+
+	const applyToolbar = useCallback(
+		(action: MarkdownToolbarAction) => {
+			const textarea = textareaRef.current;
+			if (!textarea) return;
+
+			const updated = applyMarkdownAction(
+				{
+					value: content,
+					selectionStart: textarea.selectionStart,
+					selectionEnd: textarea.selectionEnd,
+				},
+				action,
+			);
+
+			setContent(updated.value);
+			requestAnimationFrame(() => {
+				textarea.focus();
+				textarea.setSelectionRange(
+					updated.selectionStart,
+					updated.selectionEnd,
+				);
+			});
+		},
+		[content],
+	);
 
 	const handleSubmit = useCallback(async () => {
-		if (!currentUser || !trimmedContent || isSubmitting) return;
+		if (!currentUser || !preparedContent || isSubmitting) return;
 		try {
-			await onSubmit(trimmedContent);
+			await onSubmit(preparedContent);
 			setContent('');
+			setIsPreviewVisible(false);
 		} catch {
 			// Keep content so users can retry
 		}
-	}, [currentUser, isSubmitting, onSubmit, trimmedContent]);
+	}, [currentUser, isSubmitting, onSubmit, preparedContent]);
 
 	if (!currentUser) {
 		return (
@@ -111,23 +173,57 @@ function ComposeBox({
 					<UserAvatar name={currentUser.fullName} avatarUrl={currentUser.avatarUrl} />
 				)}
 				<div className="flex-1 space-y-2">
+					<MarkdownToolbar
+						compact={compact}
+						onAction={applyToolbar}
+						onTogglePreview={compact ? undefined : () => setIsPreviewVisible((value) => !value)}
+						isPreviewVisible={isPreviewVisible}
+					/>
 					<textarea
+						ref={textareaRef}
 						value={content}
-						autoFocus={compact}
+						autoFocus={autoFocus ?? compact}
 						onChange={(e) => setContent(e.target.value)}
 						onKeyDown={(e) => {
 							if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
 								e.preventDefault();
 								void handleSubmit();
+								return;
 							}
+
+							const action = getMarkdownActionFromShortcut({
+								key: e.key,
+								ctrlKey: e.ctrlKey,
+								metaKey: e.metaKey,
+								shiftKey: e.shiftKey,
+								altKey: e.altKey,
+							});
+							if (!action) return;
+
+							e.preventDefault();
+							applyToolbar(action);
 						}}
 						placeholder={placeholder}
 						rows={compact ? 2 : 3}
 						className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-300 focus:bg-white"
 					/>
+					{!compact && isPreviewVisible && (
+						<div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+							<p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+								Preview
+							</p>
+							<CommentMarkdown
+								content={content}
+								emptyText="Nothing to preview yet."
+								className="text-sm text-slate-700"
+							/>
+						</div>
+					)}
 					<div className="flex items-center justify-end gap-2">
 						{!compact && (
-							<p className="mr-auto text-xs text-slate-400">Cmd/Ctrl + Enter to submit</p>
+							<p className="mr-auto text-xs text-slate-400">
+								Markdown shortcuts: Ctrl/Cmd+B, Ctrl/Cmd+I, Ctrl/Cmd+K, Ctrl/Cmd+Enter
+							</p>
 						)}
 						{onCancel && (
 							<button
@@ -141,10 +237,10 @@ function ComposeBox({
 						<button
 							type="button"
 							onClick={() => void handleSubmit()}
-							disabled={!trimmedContent || isSubmitting}
+							disabled={!preparedContent || isSubmitting}
 							className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
 						>
-							{isSubmitting ? 'Posting...' : submitLabel}
+							{isSubmitting ? submittingLabel : submitLabel}
 						</button>
 					</div>
 				</div>
@@ -165,7 +261,9 @@ interface CommentNodeProps {
 	comment: DictionaryComment;
 	currentUser: CommentSectionCurrentUser | null;
 	onReply: (parentCommentId: string, content: string) => Promise<void>;
+	onEdit: (commentId: string, content: string) => Promise<void>;
 	postingReplyTo: string | null;
+	editingCommentId: string | null;
 	depth: number;
 }
 
@@ -173,15 +271,22 @@ function CommentNode({
 	comment,
 	currentUser,
 	onReply,
+	onEdit,
 	postingReplyTo,
+	editingCommentId,
 	depth,
 }: CommentNodeProps) {
 	const [showReplyBox, setShowReplyBox] = useState(false);
+	const [showEditBox, setShowEditBox] = useState(false);
 	const [showReplies, setShowReplies] = useState(true);
 
 	const hasReplies = comment.replies.length > 0;
 	const totalDescendants = countDescendants(comment);
 	const authorName = comment.userFullName || 'Unknown';
+	const canEdit =
+		Boolean(currentUser) &&
+		currentUser?.id === comment.userId &&
+		!comment.isDeleted;
 
 	return (
 		<div className="flex gap-2.5">
@@ -208,9 +313,14 @@ function CommentNode({
 							<span className="text-[11px] text-slate-400">· Edited</span>
 						)}
 					</div>
-					<p className={`text-sm leading-relaxed ${comment.isDeleted ? 'italic text-slate-400' : 'text-slate-700'}`}>
-						{comment.isDeleted ? 'This comment was deleted.' : comment.content}
-					</p>
+					{comment.isDeleted ? (
+						<p className="text-sm italic leading-relaxed text-slate-400">This comment was deleted.</p>
+					) : (
+						<CommentMarkdown
+							content={comment.content}
+							className="text-sm text-slate-700"
+						/>
+					)}
 				</div>
 
 				{/* Actions */}
@@ -218,10 +328,25 @@ function CommentNode({
 					{!comment.isDeleted && currentUser && (
 						<button
 							type="button"
-							onClick={() => setShowReplyBox((v) => !v)}
+							onClick={() => {
+								setShowEditBox(false);
+								setShowReplyBox((v) => !v);
+							}}
 							className="text-xs font-semibold text-slate-400 transition hover:text-blue-600"
 						>
 							{showReplyBox ? 'Cancel' : 'Reply'}
+						</button>
+					)}
+					{canEdit && (
+						<button
+							type="button"
+							onClick={() => {
+								setShowReplyBox(false);
+								setShowEditBox((v) => !v);
+							}}
+							className="text-xs font-semibold text-slate-400 transition hover:text-blue-600"
+						>
+							{showEditBox ? 'Cancel edit' : 'Edit'}
 						</button>
 					)}
 					{hasReplies && (
@@ -236,6 +361,27 @@ function CommentNode({
 						</button>
 					)}
 				</div>
+
+				{/* Inline edit compose */}
+				{showEditBox && canEdit && (
+					<div className="mt-2.5">
+						<ComposeBox
+							currentUser={currentUser}
+							placeholder="Update your comment…"
+							submitLabel="Save"
+							submittingLabel="Saving..."
+							isSubmitting={editingCommentId === comment.id}
+							initialContent={comment.content}
+							compact
+							autoFocus
+							onSubmit={async (content) => {
+								await onEdit(comment.id, content);
+								setShowEditBox(false);
+							}}
+							onCancel={() => setShowEditBox(false)}
+						/>
+					</div>
+				)}
 
 				{/* Inline reply compose */}
 				{showReplyBox && currentUser && (
@@ -265,7 +411,9 @@ function CommentNode({
 								comment={reply}
 								currentUser={currentUser}
 								onReply={onReply}
+								onEdit={onEdit}
 								postingReplyTo={postingReplyTo}
+								editingCommentId={editingCommentId}
 								depth={depth + 1}
 							/>
 						))}
@@ -300,12 +448,14 @@ export default function CommentSection({
 	currentUser,
 	fetchComments,
 	postComment,
+	updateComment,
 }: CommentSectionProps) {
 	const [comments, setComments] = useState<DictionaryComment[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isPostingRoot, setIsPostingRoot] = useState(false);
 	const [postingReplyTo, setPostingReplyTo] = useState<string | null>(null);
+	const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
 	const totalComments = useMemo(() => flattenCommentTree(comments).length, [comments]);
 
@@ -349,6 +499,23 @@ export default function CommentSection({
 		[postComment, wordId],
 	);
 
+	const handleEdit = useCallback(
+		async (commentId: string, content: string) => {
+			setError(null);
+			setEditingCommentId(commentId);
+			try {
+				const updated = await updateComment(wordId, commentId, { content });
+				setComments((existing) => updateCommentInTree(existing, updated));
+			} catch (err) {
+				setError(err instanceof Error ? err.message : 'Unable to update comment.');
+				throw err;
+			} finally {
+				setEditingCommentId(null);
+			}
+		},
+		[updateComment, wordId],
+	);
+
 	return (
 		<section className="space-y-5">
 			<div className="flex items-center justify-between gap-3">
@@ -390,7 +557,9 @@ export default function CommentSection({
 							comment={comment}
 							currentUser={currentUser}
 							onReply={(parentId, content) => handlePost(content, parentId)}
+							onEdit={handleEdit}
 							postingReplyTo={postingReplyTo}
+							editingCommentId={editingCommentId}
 							depth={0}
 						/>
 					))}
