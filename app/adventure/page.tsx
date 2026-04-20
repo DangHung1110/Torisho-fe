@@ -246,8 +246,9 @@ export default function AdventurePage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-32">
       <DashboardHeader />
-      <div className="flex w-full justify-center px-3 sm:px-4">
-        <div className="box-border w-full flex max-w-[900px] pt-8 sm:pt-10 flex-col gap-12 items-center pt-2!">
+      <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
+        <div className="w-full max-w-[1040px]">
+          <div className="box-border mx-auto flex w-full max-w-[900px] flex-col gap-8 pt-8 sm:pt-10">
           <div className="mx-auto mb-8 flex w-full flex-col items-center gap-10 text-center">
             <Title
               order={2}
@@ -283,7 +284,7 @@ export default function AdventurePage() {
               variant="default"
               radius="xl"
               size="sm"
-              className="h-9 w-full border border-gray-200/90 bg-[#f1f5f9] px-4 text-[14px] font-semibold text-gray-700 hover:bg-[#e8edf3]"
+              className="h-9 border border-gray-200/90 bg-[#f1f5f9] px-4 text-[14px] font-semibold text-gray-700 hover:bg-[#e8edf3]"
             >
               My Bookmarks
             </Button>
@@ -330,7 +331,7 @@ export default function AdventurePage() {
               const tone = levelCode ? getLevelTone(levelCode) : null;
 
               return (
-                <section key={adv.level} className="flex flex-col gap-3">
+                <section key={adv.level} className="flex w-full flex-col gap-3">
                   <div
                     onClick={() => void handleToggleLevel(adv.level)}
                     className={`group relative h-28 w-full max-w-full shrink-0 overflow-hidden rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.10)] transition-all duration-300 hover:shadow-[0_5px_14px_rgba(15,23,42,0.16)] ${adv.expandable ? 'cursor-pointer' : 'cursor-default'}`}
@@ -531,6 +532,7 @@ export default function AdventurePage() {
               );
             })}
           </div>
+        </div>
         </div>
       </div>
 
