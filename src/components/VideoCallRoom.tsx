@@ -10,7 +10,6 @@ import {
   UserJoined,
   UserLeft,
   RoomStatus,
-  JoinedRoomEvent,
   PeerJoinedEvent,
   PeerDisconnectedEvent,
   SignalOfferEvent,
@@ -51,12 +50,15 @@ const rtcConfig: RTCConfiguration = {
 };
 
 export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
+  // Room and chat state
   const [room, setRoom] = useState<Room | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageInput, setMessageInput] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState('');
+  const [mediaWarning, setMediaWarning] = useState('');
 
+  // Local and remote media state
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [remoteMicOn, setRemoteMicOn] = useState(true);
@@ -71,6 +73,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
   const peerRef = useRef<RTCPeerConnection | null>(null);
@@ -80,6 +83,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
 
   const router = useRouter();
 
+  // Load room metadata from REST API
   const loadRoomData = async () => {
     try {
       const roomData = await RoomService.getRoom(roomId);
@@ -89,6 +93,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     }
   };
 
+  // Try full media first, then degrade to audio-only, then chat-only
   const setupLocalMedia = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -98,16 +103,33 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
       }
       setIsMicOn(true);
       setIsCameraOn(true);
+      setMediaWarning('');
       return;
     } catch {
-      const audioOnly = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      localStreamRef.current = audioOnly;
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = audioOnly;
+      try {
+        const audioOnly = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        localStreamRef.current = audioOnly;
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = audioOnly;
+        }
+        setIsMicOn(true);
+        setIsCameraOn(false);
+        setMediaWarning('Camera is unavailable on this device. Audio is still active.');
+      } catch {
+        localStreamRef.current = new MediaStream();
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = localStreamRef.current;
+        }
+        setIsMicOn(false);
+        setIsCameraOn(false);
+        setMediaWarning('Camera and microphone are unavailable. You can still use chat.');
       }
-      setIsMicOn(true);
-      setIsCameraOn(false);
     }
+  };
+
+  const tryPlayRemoteMedia = () => {
+    remoteVideoRef.current?.play().catch(() => {});
+    remoteAudioRef.current?.play().catch(() => {});
   };
 
   const cleanupPeer = () => {
@@ -123,6 +145,9 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     remoteStreamRef.current = null;
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
+    }
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
     }
 
     pendingCandidatesRef.current = [];
@@ -142,6 +167,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     }
   };
 
+  // Create (or reuse) a single RTCPeerConnection and wire media handlers
   const ensurePeer = () => {
     if (peerRef.current) return peerRef.current;
 
@@ -174,6 +200,11 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = remoteStreamRef.current;
       }
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = remoteStreamRef.current;
+      }
+
+      tryPlayRemoteMedia();
 
       setHasRemoteStream(true);
     };
@@ -207,6 +238,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     return pc;
   };
 
+  // ICE can arrive before remote SDP; buffer and flush later
   const flushPendingCandidates = async (pc: RTCPeerConnection) => {
     if (!pc.remoteDescription) return;
     for (const candidate of pendingCandidatesRef.current) {
@@ -216,6 +248,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
       }
     }
     pendingCandidatesRef.current = [];
+    // Offer guard prevents overlapping negotiations from rapid events
   };
 
   const createAndSendOffer = async () => {
@@ -240,6 +273,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     }
   };
 
+  // Build hub connection and register all signaling + room events
   const connectToHub = async () => {
     const token = AuthStorage.getAccessToken();
     const baseUrl = (process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:5118/api').replace('/api', '');
@@ -308,13 +342,15 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
       loadRoomData();
     });
 
-    newConnection.on('JoinedRoom', (data: JoinedRoomEvent) => {
+    newConnection.on('JoinedRoom', () => {
     });
 
     newConnection.on('PeerJoined', async (data: PeerJoinedEvent) => {
       remoteConnectionIdRef.current = data.connectionId;
       setRemoteUserName(data.username);
       ensurePeer();
+
+      await syncMediaState(isMicOn, isCameraOn);
 
       if (room?.status === RoomStatus.Active) {
         await createAndSendOffer();
@@ -381,15 +417,10 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
       connectionRef.current = newConnection;
       setIsConnected(true);
       await newConnection.invoke('JoinRoomGroup', roomId);
+      await syncMediaState(isMicOn, isCameraOn);
     } catch {
       setError('Failed to connect to call service');
     }
-  };
-
-  const initializeRoom = async () => {
-    await loadRoomData();
-    await setupLocalMedia();
-    await connectToHub();
   };
 
   const sendMessage = async () => {
@@ -410,28 +441,101 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     }
   };
 
+  // Toggle microphone, and renegotiate only when a new track is added
   const toggleMic = async () => {
     const stream = localStreamRef.current;
     if (!stream) return;
 
     const next = !isMicOn;
-    stream.getAudioTracks().forEach((track) => {
+
+    let audioTracks = stream.getAudioTracks();
+    if (next && audioTracks.length === 0) {
+      try {
+        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const micTrack = micStream.getAudioTracks()[0];
+        let didAddNewSender = false;
+        if (micTrack) {
+          stream.addTrack(micTrack);
+          const pc = peerRef.current;
+          if (pc) {
+            const sender = pc.getSenders().find((s) => s.track?.kind === 'audio');
+            if (sender) {
+              await sender.replaceTrack(micTrack);
+            } else {
+              pc.addTrack(micTrack, stream);
+              didAddNewSender = true;
+            }
+          }
+        }
+        if (didAddNewSender && remoteConnectionIdRef.current) {
+          await createAndSendOffer();
+        }
+        audioTracks = stream.getAudioTracks();
+      } catch {
+        setMediaWarning('Cannot access microphone on this device.');
+        return;
+      }
+    }
+
+    audioTracks.forEach((track) => {
       track.enabled = next;
     });
+
     setIsMicOn(next);
     await syncMediaState(next, isCameraOn);
+    tryPlayRemoteMedia();
+    setMediaWarning('');
   };
 
+  // Toggle camera, and renegotiate only when a new track is added
   const toggleCamera = async () => {
     const stream = localStreamRef.current;
     if (!stream) return;
 
     const next = !isCameraOn;
-    stream.getVideoTracks().forEach((track) => {
+
+    let videoTracks = stream.getVideoTracks();
+    if (next && videoTracks.length === 0) {
+      try {
+        const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        const cameraTrack = cameraStream.getVideoTracks()[0];
+        let didAddNewSender = false;
+        if (cameraTrack) {
+          stream.addTrack(cameraTrack);
+
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = stream;
+          }
+
+          const pc = peerRef.current;
+          if (pc) {
+            const sender = pc.getSenders().find((s) => s.track?.kind === 'video');
+            if (sender) {
+              await sender.replaceTrack(cameraTrack);
+            } else {
+              pc.addTrack(cameraTrack, stream);
+              didAddNewSender = true;
+            }
+          }
+        }
+        if (didAddNewSender && remoteConnectionIdRef.current) {
+          await createAndSendOffer();
+        }
+        videoTracks = stream.getVideoTracks();
+      } catch {
+        setMediaWarning('Cannot access camera on this device.');
+        return;
+      }
+    }
+
+    videoTracks.forEach((track) => {
       track.enabled = next;
     });
+
     setIsCameraOn(next);
     await syncMediaState(isMicOn, next);
+    tryPlayRemoteMedia();
+    setMediaWarning('');
   };
 
   const handleLeaveRoom = async () => {
@@ -463,7 +567,16 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     }
   };
 
+  // Initialize media + hub once per roomId, and clean up on unmount
   useEffect(() => {
+    const initializeRoomForCurrentId = async () => {
+      await loadRoomData();
+      await setupLocalMedia();
+      await connectToHub();
+    };
+
+    const localVideoEl = localVideoRef.current;
+
     if (currentRoomIdRef.current !== roomId) {
       initializedRef.current = false;
       currentRoomIdRef.current = roomId;
@@ -472,17 +585,48 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    initializeRoom();
+    initializeRoomForCurrentId();
 
     return () => {
       if (connectionRef.current) {
         connectionRef.current.stop();
         connectionRef.current = null;
       }
-      cleanupAllMedia();
+      cleanupPeer();
+      localStreamRef.current?.getTracks().forEach((t) => t.stop());
+      localStreamRef.current = null;
+      if (localVideoEl) {
+        localVideoEl.srcObject = null;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  // Best-effort leave call for browser close/reload
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      if (!roomId) return;
+
+      const token = AuthStorage.getAccessToken();
+      if (!token) return;
+
+      const apiBase = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:5118/api';
+      fetch(`${apiBase}/room/${roomId}/leave`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        keepalive: true,
+      }).catch(() => {});
+    };
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
     };
   }, [roomId]);
 
+  // Auto-scroll chat to latest message
   useEffect(() => {
     viewportRef.current?.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
@@ -539,9 +683,9 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     <div className="min-h-screen bg-[#f8fafc]">
       <DashboardHeader />
 
-      <Container size="xl" className="max-w-[1200px] px-5 pb-12 pt-8 sm:px-8">
+      <Container size="xl" className="max-w-300 px-5 pb-12 pt-8 sm:px-8">
         <div className="mb-5 flex items-center justify-between gap-3">
-          <Button component={Link} href="/adventure" variant="subtle" color="gray" radius="xl">
+          <Button onClick={handleLeaveRoom} variant="subtle" color="gray" radius="xl">
             Back
           </Button>
 
@@ -573,13 +717,14 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, lg: 8 }}>
               <Stack gap="md" h="100%">
-                <Paper radius="lg" withBorder className="relative overflow-hidden bg-black min-h-[420px] sm:min-h-[500px]">
+                <Paper radius="lg" withBorder className="relative overflow-hidden bg-black min-h-105 sm:min-h-125">
                   <video
                     ref={remoteVideoRef}
                     autoPlay
                     playsInline
                     className="h-full w-full object-cover"
                   />
+                  <audio ref={remoteAudioRef} autoPlay playsInline />
 
                   {!hasRemoteStream && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white">
@@ -629,6 +774,12 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
                   </Group>
                 </Paper>
 
+                {mediaWarning && (
+                  <Alert color="yellow" variant="light" radius="md">
+                    {mediaWarning}
+                  </Alert>
+                )}
+
                 {room.status === RoomStatus.Waiting && (
                   <Alert color="orange" variant="light" radius="md">
                     Waiting for another participant...
@@ -656,7 +807,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
             </Grid.Col>
 
             <Grid.Col span={{ base: 12, lg: 4 }}>
-              <Paper radius="lg" withBorder className="flex h-full min-h-[420px] flex-col overflow-hidden sm:min-h-[500px]">
+              <Paper radius="lg" withBorder className="flex h-full min-h-105 flex-col overflow-hidden sm:min-h-125">
                 <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-4 py-3">
                   <Text size="sm" fw={600} className="text-gray-800">Chat</Text>
                   <Badge radius="xl" variant="light" color={isConnected ? 'green' : 'gray'}>
