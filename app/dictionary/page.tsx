@@ -34,7 +34,7 @@ function WordResultCard({ word, keyword }: { word: WordSearchResult; keyword: st
         </span>
         {word.kanji && (
           <span className={`${notoSansJp.className} text-sm text-slate-400`}>
-            {word.kana}
+            {word.matchedReading ?? word.kana}
           </span>
         )}
       </div>
