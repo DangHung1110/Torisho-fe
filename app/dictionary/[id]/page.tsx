@@ -278,6 +278,7 @@ function WordDetailPageContent() {
                       fetchComments={dictionaryService.getComments}
                       postComment={dictionaryService.postComment}
                       updateComment={dictionaryService.updateComment}
+                      deleteComment={dictionaryService.deleteComment}
                     />
                   </section>
                 </div>

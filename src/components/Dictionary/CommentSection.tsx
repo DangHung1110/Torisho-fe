@@ -46,6 +46,7 @@ interface CommentSectionProps {
 		commentId: string,
 		request: UpdateDictionaryCommentRequest
 	) => Promise<DictionaryComment>;
+	deleteComment: (wordId: string, commentId: string) => Promise<DictionaryComment>;
 }
 
 interface ComposeBoxProps {
@@ -262,8 +263,10 @@ interface CommentNodeProps {
 	currentUser: CommentSectionCurrentUser | null;
 	onReply: (parentCommentId: string, content: string) => Promise<void>;
 	onEdit: (commentId: string, content: string) => Promise<void>;
+	onDelete: (commentId: string) => Promise<void>;
 	postingReplyTo: string | null;
 	editingCommentId: string | null;
+	deletingCommentId: string | null;
 	depth: number;
 }
 
@@ -272,8 +275,10 @@ function CommentNode({
 	currentUser,
 	onReply,
 	onEdit,
+	onDelete,
 	postingReplyTo,
 	editingCommentId,
+	deletingCommentId,
 	depth,
 }: CommentNodeProps) {
 	const [showReplyBox, setShowReplyBox] = useState(false);
@@ -287,6 +292,7 @@ function CommentNode({
 		Boolean(currentUser) &&
 		currentUser?.id === comment.userId &&
 		!comment.isDeleted;
+	const isDeleting = deletingCommentId === comment.id;
 
 	return (
 		<div className="flex gap-2.5">
@@ -332,7 +338,8 @@ function CommentNode({
 								setShowEditBox(false);
 								setShowReplyBox((v) => !v);
 							}}
-							className="text-xs font-semibold text-slate-400 transition hover:text-blue-600"
+							disabled={isDeleting}
+							className="text-xs font-semibold text-slate-400 transition hover:text-blue-600 disabled:cursor-not-allowed disabled:text-slate-300"
 						>
 							{showReplyBox ? 'Cancel' : 'Reply'}
 						</button>
@@ -344,9 +351,25 @@ function CommentNode({
 								setShowReplyBox(false);
 								setShowEditBox((v) => !v);
 							}}
-							className="text-xs font-semibold text-slate-400 transition hover:text-blue-600"
+							disabled={isDeleting}
+							className="text-xs font-semibold text-slate-400 transition hover:text-blue-600 disabled:cursor-not-allowed disabled:text-slate-300"
 						>
 							{showEditBox ? 'Cancel edit' : 'Edit'}
+						</button>
+					)}
+					{canEdit && (
+						<button
+							type="button"
+							onClick={() => {
+								void onDelete(comment.id).then(() => {
+									setShowEditBox(false);
+									setShowReplyBox(false);
+								});
+							}}
+							disabled={isDeleting}
+							className="text-xs font-semibold text-rose-500 transition hover:text-rose-600 disabled:cursor-not-allowed disabled:text-rose-300"
+						>
+							{isDeleting ? 'Deleting...' : 'Delete'}
 						</button>
 					)}
 					{hasReplies && (
@@ -412,8 +435,10 @@ function CommentNode({
 								currentUser={currentUser}
 								onReply={onReply}
 								onEdit={onEdit}
+								onDelete={onDelete}
 								postingReplyTo={postingReplyTo}
 								editingCommentId={editingCommentId}
+								deletingCommentId={deletingCommentId}
 								depth={depth + 1}
 							/>
 						))}
@@ -449,6 +474,7 @@ export default function CommentSection({
 	fetchComments,
 	postComment,
 	updateComment,
+	deleteComment,
 }: CommentSectionProps) {
 	const [comments, setComments] = useState<DictionaryComment[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -456,6 +482,7 @@ export default function CommentSection({
 	const [isPostingRoot, setIsPostingRoot] = useState(false);
 	const [postingReplyTo, setPostingReplyTo] = useState<string | null>(null);
 	const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+	const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
 	const totalComments = useMemo(() => flattenCommentTree(comments).length, [comments]);
 
@@ -516,6 +543,26 @@ export default function CommentSection({
 		[updateComment, wordId],
 	);
 
+	const handleDelete = useCallback(
+		async (commentId: string) => {
+			setError(null);
+			setDeletingCommentId(commentId);
+			try {
+				const confirmed = typeof window === 'undefined' || window.confirm('Delete this comment?');
+				if (!confirmed) return;
+
+				const deleted = await deleteComment(wordId, commentId);
+				setComments((existing) => updateCommentInTree(existing, deleted));
+			} catch (err) {
+				setError(err instanceof Error ? err.message : 'Unable to delete comment.');
+				throw err;
+			} finally {
+				setDeletingCommentId(null);
+			}
+		},
+		[deleteComment, wordId],
+	);
+
 	return (
 		<section className="space-y-5">
 			<div className="flex items-center justify-between gap-3">
@@ -558,8 +605,10 @@ export default function CommentSection({
 							currentUser={currentUser}
 							onReply={(parentId, content) => handlePost(content, parentId)}
 							onEdit={handleEdit}
+							onDelete={handleDelete}
 							postingReplyTo={postingReplyTo}
 							editingCommentId={editingCommentId}
+							deletingCommentId={deletingCommentId}
 							depth={0}
 						/>
 					))}
