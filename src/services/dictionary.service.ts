@@ -91,5 +91,12 @@ export const dictionaryService = {
 			{ requiresAuth: true }
 		);
 	},
+
+	async deleteComment(id: string, commentId: string): Promise<DictionaryComment> {
+		return api.delete<DictionaryComment>(
+			`${DICTIONARY_ENDPOINT}/${id}/comments/${commentId}`,
+			{ requiresAuth: true }
+		);
+	},
 };
 
