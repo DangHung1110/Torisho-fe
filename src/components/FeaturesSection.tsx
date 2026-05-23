@@ -1,146 +1,212 @@
 'use client';
 
-import { Container, Title, Text, Accordion, ThemeIcon, Box, Group } from '@mantine/core';
+import Image from 'next/image';
+import {
+  IconBook2 as BookOpen,
+  IconClipboardCheck as ClipboardCheck,
+  IconLayersSubtract as Layers,
+  IconMap as Map,
+  IconMicrophone2 as Mic2,
+  IconSparkles as Sparkles,
+} from '@tabler/icons-react';
 
-const features = [
+const workflowArtwork =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCqwUQ5cGoH5bzR10tV558UhzRNdOKCiyfTQLC5zYatrtew0ruMRzKstZRb8P4wpsQTFzox_qbaPMIKSvoCUU9NYUK6MrZaP77B-7xT3Z7LJH4iAGS8JKcaa8vee3BsSBWNdCmy7NiN6wzj8NQi8RJ_2gjemhDn-czUSH6qg8kxEbTlfkCy0YWF-PYHLfUGJX5qOM9ESxuT-ZLl7tEaHLuQFs_jyLv8VcSQglQlkHbBh-JaXcObTBVhdy_1k19dTv3c-bw_PEe-AL8';
+
+const workflowSteps = [
   {
-    number: '1',
-    title: 'Explore The TorishoVerse',
-    description: 'Go on a Japanese language adventure throughout our beautiful animated islands teeming with Japanese language content. Our gamified system contains regions for every level of language mastery (PRE-N5 → N1), and each one features hand-crafted Grammar Lessons, Reading Exercises, Course Exercises (drills), Vocabulary and Kanji unlocks, and more!',
-    icon: '🗺️',
-    mascot: '🐔'
+    title: 'Study Lesson',
+    text: 'Engage with bite-sized daily lessons tailored to your JLPT level.',
+    origin: 'top left',
   },
   {
-    number: '2',
-    title: 'In-Depth Grammar Lessons',
-    description: 'Master Japanese grammar with comprehensive lessons that break down complex concepts into easy-to-understand explanations.',
-    icon: '📚',
-    mascot: '📚'
+    title: 'Take Quiz',
+    text: 'Test your knowledge and lock in what you have just learned.',
+    origin: 'top right',
   },
   {
-    number: '3',
-    title: 'Grammar SRS Exercises',
-    description: 'Practice with spaced repetition system exercises designed to help you retain grammar patterns long-term.',
-    icon: '🔄',
-    mascot: '🔄'
+    title: 'Save Flashcards',
+    text: 'Collect vocabulary and kanji to review with spaced repetition.',
+    origin: 'bottom left',
   },
   {
-    number: '4',
-    title: 'Deciphering Kanji',
-    description: 'Learn kanji effectively with mnemonics, stroke order animations, and practical usage examples.',
-    icon: '🖌️',
-    mascot: '🖌️'
+    title: 'Practice Speaking',
+    text: 'Build pronunciation confidence through guided speaking practice.',
+    origin: 'bottom right',
+  },
+];
+
+const toolkit = [
+  {
+    title: 'Adventure Learning',
+    text: 'Move through themed JLPT islands from PRE-N5 to N1.',
+    Icon: Map,
+    color: '#f4dfc8',
+    iconColor: '#835500',
   },
   {
-    number: '5',
-    title: 'Learning Vocabulary',
-    description: 'Build your vocabulary with thousands of words across all JLPT levels, complete with example sentences.',
-    icon: '🐠',
-    mascot: '🐠'
+    title: 'Daily Quiz',
+    text: 'Small reviews keep grammar and vocabulary fresh every day.',
+    Icon: ClipboardCheck,
+    color: '#3fb27f',
+    iconColor: '#ffffff',
   },
   {
-    number: '6',
-    title: 'Reading Exercises',
-    description: 'Improve your reading comprehension with graded reading materials tailored to your level.',
-    icon: '📖',
-    mascot: '📖'
+    title: 'Dictionary + Kanji',
+    text: 'Search words, readings, kanji details, and examples quickly.',
+    Icon: BookOpen,
+    color: '#5b9bd5',
+    iconColor: '#ffffff',
   },
   {
-    number: '7',
-    title: '(Premade) Study Lists',
-    description: 'Access curated study lists for specific topics, JLPT levels, and learning goals.',
-    icon: '💡',
-    mascot: '💡'
+    title: 'Flashcards',
+    text: 'Save custom cards and revisit weak spots with focused decks.',
+    Icon: Layers,
+    color: '#f5a623',
+    iconColor: '#ffffff',
   },
   {
-    number: '8',
-    title: 'Keep Track Of Your Progress',
-    description: 'Monitor your learning journey with detailed statistics and achievement tracking.',
-    icon: '🏆',
-    mascot: '🏆'
-  }
+    title: 'Speaking Practice',
+    text: 'Find partners and practice real-time conversation rooms.',
+    Icon: Mic2,
+    color: '#9b72cf',
+    iconColor: '#ffffff',
+  },
+];
+
+const jlptNodes = [
+  { level: 'N5', label: 'Beginner', detail: '800 Vocab', color: '#cfeedd' },
+  { level: 'N4', label: 'Elementary', detail: '800 Vocab, 80 Grammar', color: '#3fb27f' },
+  { level: 'N3', label: 'Intermediate', detail: '1,500 Vocab, 150 Grammar', color: '#5b9bd5' },
+  { level: 'N2', label: 'Advanced', detail: '3,000 Vocab, 300 Grammar', color: '#f5a623' },
+  { level: 'N1', label: 'Fluent', detail: '6,000 Vocab, 600 Grammar', color: '#9b72cf' },
 ];
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="py-24 md:py-28 bg-[#f3f4f6]">
-      <Container size="xl">
-        <div className="text-center mb-14 md:mb-16">
-          <Title order={2} className="text-5xl md:text-6xl font-black text-gray-800 mb-6 tracking-tight leading-[1.1]">
-            How we teach you Japanese
-          </Title>
-          <Text size="xl" c="dimmed" className="max-w-300 mx-auto text-center text-[24px] md:text-[30px] font-medium leading-[1.45] text-gray-400">
-            In Torisho we teach you all the way from start to finish in a fully structured manner.
-            But we also offer many ways to create your own study path.
-          </Text>
-        </div>
+    <>
+      <section className="border-y border-[#d7c3ae] bg-[#fff1e4] py-12 sm:py-14">
+        <div className="torisho-shell">
+          <SectionHeader
+            eyebrow="Daily flow"
+            title="Your Daily Workflow"
+            text="A simple habit loop to master Japanese consistently every day."
+          />
 
-        <Accordion
-          variant="default"
-          radius="md"
-          chevronPosition="right"
-          defaultValue="1"
-          className="max-w-5xl mx-auto"
-          styles={{
-            item: {
-              border: 'none',
-              borderBottom: '1px solid #d7dce3',
-              borderRadius: 0,
-              backgroundColor: 'transparent',
-              transition: 'all 0.2s ease',
-              '&[dataActive]': {
-                backgroundColor: 'transparent',
-              },
-            },
-            control: {
-              padding: '0.85rem 0.1rem',
-            },
-            content: {
-              padding: '0 0.1rem 1rem',
-            },
-            chevron: {
-              color: '#9ca3af',
-            },
-          }}
-        >
-          {features.map((feature) => (
-            <Accordion.Item
-              key={feature.number}
-              value={feature.number}
-              className="mb-0"
-            >
-              <Accordion.Control>
-                <Group wrap="nowrap" className="min-h-14">
-                  <ThemeIcon
-                    size={40}
-                    radius="xl"
-                    variant="filled"
-                    color="gray.1"
-                    className="shrink-0"
-                  >
-                    <span className="text-xl md:text-2xl font-extrabold text-gray-700 leading-none">{feature.number}</span>
-                  </ThemeIcon>
-
-                  <Box className="shrink-0 text-[30px] hidden sm:block opacity-90 ml-1.5">
-                    {feature.icon}
-                  </Box>
-
-                  <Title order={3} className="text-[24px] md:text-[30px] font-black text-gray-700 leading-tight tracking-tight ml-1.5">
-                    {feature.title}
-                  </Title>
-                </Group>
-              </Accordion.Control>
-              <Accordion.Panel>
-                <div className="pt-1 pb-2 flex flex-col md:flex-row gap-4 items-start">
-                  <Text size="lg" className="text-gray-600 leading-relaxed flex-1 pl-20 md:pl-24 pr-4">
-                    {feature.description}
-                  </Text>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {workflowSteps.map((step) => (
+              <article key={step.title} className="flex flex-col items-center text-center">
+                <div className="relative mb-4 h-28 w-28 overflow-hidden rounded-full border-2 border-[#ffddb4] bg-white shadow-sm">
+                  <Image
+                    src={workflowArtwork}
+                    alt=""
+                    fill
+                    unoptimized
+                    sizes="128px"
+                    className="object-cover"
+                    style={{
+                      transform: 'scale(2)',
+                      transformOrigin: step.origin,
+                    }}
+                  />
                 </div>
-              </Accordion.Panel>
-            </Accordion.Item>
-          ))}
-        </Accordion>
-      </Container>
-    </section>
+                <h3 className="torisho-display text-xl font-semibold text-[#211a12]">
+                  {step.title}
+                </h3>
+                <p className="mt-2 max-w-[230px] text-sm leading-6 text-[#665744]">{step.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className="bg-white py-12 sm:py-14">
+        <div className="torisho-shell">
+          <SectionHeader
+            eyebrow="Features"
+            title="Scholar's Toolkit"
+            text="Everything you need to master grammar, reading, vocabulary, kanji, and spoken fluency."
+          />
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            {toolkit.map(({ Icon, ...feature }) => (
+              <article
+                key={feature.title}
+                className="group flex min-h-[180px] flex-col items-center justify-center rounded-lg border border-[#d7c3ae] bg-[#fffdfb] p-5 text-center shadow-[0_4px_12px_rgba(26,20,16,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(54,37,20,0.10)]"
+              >
+                <span
+                  className="mb-4 flex h-14 w-14 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-105"
+                  style={{ backgroundColor: feature.color }}
+                >
+                  <Icon size={24} color={feature.iconColor} stroke={2} />
+                </span>
+                <h3 className="torisho-display text-lg font-semibold leading-tight text-[#211a12]">
+                  {feature.title}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-[#665744]">{feature.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-[#d7c3ae] bg-[#fff8f4] py-12 sm:py-14">
+        <div className="torisho-shell">
+          <SectionHeader
+            eyebrow="Curriculum"
+            title="Structured JLPT Paths"
+            text="Track your progress from beginner to advanced with dedicated curriculum modules."
+          />
+
+          <div className="relative mx-auto mt-9 max-w-[900px]">
+            <div className="absolute left-8 right-8 top-8 hidden h-1 bg-[#d7c3ae] md:block" />
+            <div className="relative z-10 grid grid-cols-1 gap-7 md:grid-cols-5">
+              {jlptNodes.map((node, index) => (
+                <article key={node.level} className="flex flex-col items-center text-center">
+                  <div
+                    className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-[#fff8f4] text-base font-bold text-white shadow-sm transition-transform hover:scale-110"
+                    style={{ backgroundColor: node.color }}
+                  >
+                    <span className={index === 0 ? 'text-white/85' : 'text-white'}>{node.level}</span>
+                  </div>
+                  <div className="mt-2 min-h-[64px] w-full min-w-[128px] rounded-md border border-[#d7c3ae] bg-white px-3 py-2.5 shadow-[0_4px_10px_rgba(26,20,16,0.04)]">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#665744]">
+                      {node.label}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[#3d2a17]">{node.detail}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="mx-auto mt-9 flex max-w-3xl items-center justify-center gap-3 rounded-lg border border-[#d7c3ae] bg-white/70 px-5 py-4 text-center text-sm leading-6 text-[#524534]">
+            <Sparkles className="hidden flex-shrink-0 text-[#f5a623] sm:block" size={22} />
+            <span>
+              Lessons, quizzes, dictionary saves, and flashcards all point back to the same JLPT
+              journey, so progress feels connected instead of scattered.
+            </span>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function SectionHeader({
+  eyebrow,
+  title,
+  text,
+}: {
+  eyebrow: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="mx-auto mb-8 max-w-3xl text-center sm:mb-9">
+      <p className="torisho-eyebrow mb-3">{eyebrow}</p>
+      <h2 className="torisho-section-title">{title}</h2>
+      <p className="torisho-section-copy mx-auto mt-3 max-w-2xl">{text}</p>
+    </div>
   );
 }

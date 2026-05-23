@@ -1,33 +1,14 @@
 'use client';
-import {
-  Anchor,
-  Button,
-  Checkbox,
-  PasswordInput,
-  Text,
-  TextInput,
-  Title,
-  Alert,
-  LoadingOverlay,
-} from '@mantine/core';
-import { IconBrandDiscord, IconBrandGoogle, IconChevronsRight, IconInfoCircle } from '@tabler/icons-react';
-import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { AuthService } from '../services/auth.service';
+
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { IconArrowRight, IconInfoCircle } from '@tabler/icons-react';
+import { AuthService } from '../services/auth.service';
 
-const inputClassNames = {
-  root: 'w-full',
-  label: 'mb-2 text-xs font-medium text-gray-400',
-  input:
-    '!h-12 !rounded-full border-0 bg-[var(--auth-input-bg)] px-5 text-[0.9375rem] text-gray-800 shadow-none transition-all placeholder:text-gray-400 focus:!border-transparent focus:!ring-2 focus:!ring-[var(--auth-input-focus)]',
-};
-
-const passwordClassNames = {
-  ...inputClassNames,
-  innerInput: 'h-12',
-};
+const registerArtwork =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDP_96wqNc0lgfpjLf1EvKzPFIsWr4Ii7_yD5o8NU8AGIuRw-ZrixvNdlCXwWYUfj5Ml6ZNXIbqszMxMpKDusb0dZMV7rLTttK689o7-MK6DN6zbAioe7_e7AVW8nDaK1LRqSSnB2Nt-Vi_DCyd9uP9Gx8pF34CayEFVCZfk_5tNvz2R3cIRkOQ6QtUFtQJmnIUwXRDrH6D-hcwY5-L0WXr9wQa0467QcKkfbmdirAmWdDds4mI12tDSF6pzb16ZenP4vGKyEn5bDY';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -36,7 +17,7 @@ export function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullname, setFullname] = useState('');
-  const [agreed, setAgreed] = useState(true);
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,189 +46,192 @@ export function RegisterForm() {
     }
   };
 
-  const handleDiscordLogin = () => {
-    AuthService.loginWithDiscord();
-  };
-  const handleGoogleLogin = () => {
-    AuthService.loginWithGoogle();
-  };
-
   return (
-    <div className="flex min-h-screen w-full bg-white">
-      <div className="flex w-full items-center justify-center overflow-y-auto px-6 py-10 md:px-10 lg:w-[56%] lg:min-w-0 lg:px-14 xl:px-16">
-        <div className="w-full max-w-[min(100%,680px)] xl:max-w-[720px]">
-          <Link href="/" className="group mb-8 flex w-fit items-center gap-2.5 no-underline">
-            <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-full shadow-md">
-              <Image src="/images/torisho-logo.png" alt="Torisho" width={40} height={40} className="h-full w-full object-cover" />
-            </div>
-            <span className="text-xl font-bold text-gray-800 transition-colors group-hover:text-orange-500">Torisho</span>
+    <div className="torisho-auth-grid bg-white text-[#211a12]">
+      <main className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-[#fffdfb] py-10 lg:py-8">
+        <div className="torisho-auth-form">
+          <Link href="/" className="mb-8 flex w-fit items-center gap-3 no-underline lg:hidden">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[0] shadow-sm ring-1 ring-[#d7c3ae]">
+              <span className="text-2xl">{'\uD83D\uDC14'}</span>
+            </span>
+            <span className="font-[var(--font-display)] text-2xl font-bold text-[#7a4300]">Torisho</span>
           </Link>
 
-          <Title order={1} className="mb-1 text-[1.85rem] font-extrabold leading-tight tracking-tight text-gray-900 sm:text-[2rem]">
-            Ready to Master Japanese?
-          </Title>
-          <Text size="sm" className="mb-8 text-gray-500">
-            Start your journey now!
-          </Text>
+          <div className="mb-9 text-center">
+            <h1 className="torisho-display text-5xl font-bold leading-tight text-[#7a4300]">
+              Start your journey
+            </h1>
+            <p className="mt-3 text-xl text-[#3d2a17]">Create your free Torisho account</p>
+          </div>
 
           {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title="Registration failed"
-              icon={<IconInfoCircle size={18} />}
-              radius="lg"
-              className="mb-5 border border-red-100 bg-red-50/50"
-            >
-              {error}
-            </Alert>
+            <div className="mb-6 flex gap-3 rounded-lg border border-[#ffdad6] bg-[#fff1ef] px-4 py-3 text-sm text-[#93000a]">
+              <IconInfoCircle size={18} className="mt-0.5 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
           )}
 
-          <div className="relative">
-            <LoadingOverlay
-              visible={loading}
-              zIndex={1000}
-              overlayProps={{ radius: 'md', blur: 2 }}
-              loaderProps={{ color: 'blue', type: 'bars' }}
+          <form onSubmit={handleRegister} className="space-y-4">
+            <AuthField
+              label="Username"
+              value={username}
+              onChange={setUsername}
+              placeholder="Enter your username"
+              required
+            />
+            <AuthField
+              label="Full Name"
+              value={fullname}
+              onChange={setFullname}
+              placeholder="Enter your full name"
+            />
+            <AuthField
+              label="Email"
+              value={email}
+              onChange={setEmail}
+              placeholder="Enter your email"
+              type="email"
+              required
+            />
+            <AuthField
+              label="Password"
+              value={password}
+              onChange={setPassword}
+              placeholder="Create a password"
+              type="password"
+              required
+            />
+            <AuthField
+              label="Confirm Password"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              placeholder="Confirm your password"
+              type="password"
+              required
             />
 
-            <div className="flex flex-col items-stretch gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-14">
-              <div className="min-w-0 w-full flex-1">
-                <form onSubmit={handleRegister} className="flex flex-col gap-5">
-                  <TextInput
-                    label="Username"
-                    placeholder="username"
-                    size="md"
-                    radius="xl"
-                    required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    classNames={inputClassNames}
-                  />
-                                    <TextInput
-                    label="Full Name"
-                    placeholder="Your full name (optional)"
-                    size="md"
-                    radius="xl"
-                    value={fullname}
-                    onChange={(e) => setFullname(e.target.value)}
-                    classNames={inputClassNames}
-                  />
-                  <TextInput
-                    label="Email"
-                    placeholder="hello@gmail.com"
-                    size="md"
-                    radius="xl"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    classNames={inputClassNames}
-                  />
-                  <PasswordInput
-                    label="Password"
-                    placeholder="Password"
-                    size="md"
-                    radius="xl"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    classNames={passwordClassNames}
-                  />
-                  <PasswordInput
-                    label="Confirm"
-                    placeholder="Confirm password"
-                    size="md"
-                    radius="xl"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    classNames={passwordClassNames}
-                  />
-                  <Checkbox
-                    label={
-                      <span className="text-xs leading-relaxed text-gray-500">
-                        I agree with the{' '}
-                        <Anchor href="#" size="xs" className="font-medium text-[var(--auth-primary)]">
-                          Terms of Service
-                        </Anchor>{' '}
-                        and essential functional cookies
-                      </span>
-                    }
-                    size="sm"
-                    required
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.currentTarget.checked)}
-                    classNames={{ label: 'text-gray-600', input: 'cursor-pointer border-gray-300' }}
-                  />
+            <label className="flex items-center gap-3 pt-2 text-base text-[#3d2a17]">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.currentTarget.checked)}
+                className="h-5 w-5 rounded border-[#d7c3ae] text-[#f5a623] accent-[#f5a623]"
+              />
+              <span>I agree to the Terms of Service</span>
+            </label>
 
-                  <Button
-                    fullWidth
-                    type="submit"
-                    radius="xl"
-                    size="lg"
-                    rightSection={<IconChevronsRight size={18} stroke={1.5} />}
-                    className="!h-[3.25rem] border-0 !bg-[var(--auth-primary)] font-bold !text-white shadow-md shadow-blue-400/15 transition-all hover:!bg-[var(--auth-primary-hover)] hover:shadow-lg"
-                  >
-                    Register
-                  </Button>
-                </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-3 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[#f5a623] px-6 text-sm font-extrabold uppercase tracking-[0.08em] text-[#291800] transition-all hover:bg-[#ffb955] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading ? 'Creating...' : 'Create Account'}
+              <IconArrowRight size={18} />
+            </button>
+          </form>
 
-                <div className="mt-7 space-y-2">
-                  <Text size="sm" className="text-gray-500">
-                    Already have an account?{' '}
-                    <Anchor component={Link} href="/login" fw={600} className="text-[var(--auth-primary)] hover:underline">
-                      Sign in
-                    </Anchor>
-                  </Text>
-                  <Text size="sm" className="text-gray-500">
-                    Forgot your password?{' '}
-                    <Anchor href="#" fw={600} className="text-[var(--auth-primary)] hover:underline">
-                      Reset your password
-                    </Anchor>
-                  </Text>
-                </div>
-              </div>
-
-              <div className="flex w-full flex-col gap-3 lg:w-[240px] lg:flex-none lg:shrink-0 lg:pt-[16.5rem]">
-                <Button
-                  variant="default"
-                  leftSection={<IconBrandDiscord size={20} className="text-[#5865F2]" />}
-                  radius="xl"
-                  size="md"
-                  fullWidth
-                  className="h-12 border border-gray-200/80 bg-[var(--auth-input-bg)] font-medium text-gray-700 hover:bg-gray-200/90"
-                  onClick={handleDiscordLogin}
-                >
-                  Continue with Discord
-                </Button>
-                <Button
-                  variant="default"
-                  leftSection={<IconBrandGoogle size={20} />}
-                  radius="xl"
-                  size="md"
-                  fullWidth
-                  className="h-12 border border-gray-200/80 bg-[var(--auth-input-bg)] font-medium text-gray-700 hover:bg-gray-200/90"
-                  onClick={handleGoogleLogin}
-                >
-                  Continue with Google
-                </Button>
-              </div>
-            </div>
+          <div className="my-7 flex items-center gap-5">
+            <div className="h-px flex-1 bg-[#d7c3ae]" />
+            <span className="text-base text-[#665744]">or</span>
+            <div className="h-px flex-1 bg-[#d7c3ae]" />
           </div>
-        </div>
-      </div>
 
-      <div className="relative hidden min-h-screen flex-1 overflow-hidden lg:block">
-        <Image
-          src="/images/torisho-auth-bg.png"
-          alt="Torisho Mascot"
-          fill
-          className="object-cover object-center"
-          priority
-        />
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-white via-white/85 to-transparent sm:w-32 md:w-40" />
-      </div>
+          <button
+            type="button"
+            onClick={() => AuthService.loginWithGoogle()}
+            className="flex h-[52px] w-full items-center justify-center gap-4 rounded-full border border-[#d7c3ae] bg-white px-6 text-lg font-medium text-[#211a12] transition-colors hover:bg-[#fff8f4]"
+          >
+            <GoogleLogo />
+            Continue with Google
+          </button>
+
+          <p className="mt-10 text-center text-base text-[#3d2a17]">
+            Already have an account?{' '}
+            <Link href="/login" className="font-bold text-[#211a12] underline decoration-[#d7c3ae] underline-offset-4">
+              Login
+            </Link>
+          </p>
+        </div>
+      </main>
+
+      <aside className="relative hidden min-h-screen overflow-hidden bg-gradient-to-br from-[#006b5f] via-[#64885a] to-[#f5a623] px-14 py-12 text-white lg:flex lg:items-center lg:justify-center">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,.22),_transparent_58%)]" />
+        <div className="relative z-10 flex max-w-[560px] flex-col items-center text-center">
+          <div className="relative h-[320px] w-[320px] bg-white shadow-[0_24px_42px_rgba(54,37,20,0.20)] ring-1 ring-white/60">
+            <Image
+              src={registerArtwork}
+              alt="Torisho chicken sensei studying Japanese"
+              fill
+              priority
+              unoptimized
+              sizes="320px"
+              className="object-contain p-5"
+            />
+          </div>
+
+          <h2 className="torisho-display mt-14 text-5xl font-bold leading-tight text-white drop-shadow-sm">
+            Join thousands of Japanese learners
+          </h2>
+          <p className="mt-8 text-xl leading-8 text-white/90">
+            Master reading, writing, and vocabulary with Torisho&apos;s guided curriculum.
+          </p>
+        </div>
+      </aside>
     </div>
+  );
+}
+
+function AuthField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-[#211a12]">
+        {label}
+      </span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        className="torisho-auth-input rounded-full"
+      />
+    </label>
+  );
+}
+
+function GoogleLogo() {
+  return (
+    <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
+      <path
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        fill="#EA4335"
+      />
+    </svg>
   );
 }

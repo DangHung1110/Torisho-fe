@@ -1,172 +1,116 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Button, Container, Title, Text, Group, Box, Badge } from '@mantine/core';
-import Image from 'next/image';
-import { Baloo_2 } from 'next/font/google';
 
-const displayFont = Baloo_2({
-  subsets: ['latin'],
-  weight: ['700', '800'],
-});
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { IconArrowRight, IconSearch } from '@tabler/icons-react';
+
+const heroArtwork =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDP_96wqNc0lgfpjLf1EvKzPFIsWr4Ii7_yD5o8NU8AGIuRw-ZrixvNdlCXwWYUfj5Ml6ZNXIbqszMxMpKDusb0dZMV7rLTttK689o7-MK6DN6zbAioe7_e7AVW8nDaK1LRqSSnB2Nt-Vi_DCyd9uP9Gx8pF34CayEFVCZfk_5tNvz2R3cIRkOQ6QtUFtQJmnIUwXRDrH6D-hcwY5-L0WXr9wQa0467QcKkfbmdirAmWdDds4mI12tDSF6pzb16ZenP4vGKyEn5bDY';
 
 const learningPaths = [
   'Grammar SRS',
   'Reading Exercises',
   'Kanji Learning',
   'Vocabulary Building',
-  'Language Mastery'
+  'Language Mastery',
 ];
 
 export default function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [typingSpeed, setTypingSpeed] = useState(150);
+  const [typingSpeed, setTypingSpeed] = useState(135);
 
   useEffect(() => {
     const currentWord = learningPaths[currentIndex];
 
-    const handleTyping = () => {
+    const timer = window.setTimeout(() => {
       if (!isDeleting) {
         if (displayText.length < currentWord.length) {
-          setDisplayText(currentWord.substring(0, displayText.length + 1));
-          setTypingSpeed(150);
+          setDisplayText(currentWord.slice(0, displayText.length + 1));
+          setTypingSpeed(135);
         } else {
-          setTimeout(() => setIsDeleting(true), 2000);
+          setTypingSpeed(1350);
+          setIsDeleting(true);
         }
-      } else {
-        if (displayText.length > 0) {
-          setDisplayText(currentWord.substring(0, displayText.length - 1));
-          setTypingSpeed(100);
-        } else {
-          setIsDeleting(false);
-          setCurrentIndex((prevIndex) => (prevIndex + 1) % learningPaths.length);
-          setTypingSpeed(500);
-        }
+        return;
       }
-    };
 
-    const timer = setTimeout(handleTyping, typingSpeed);
-    return () => clearTimeout(timer);
-  }, [displayText, isDeleting, currentIndex, typingSpeed]);
+      if (displayText.length > 0) {
+        setDisplayText(currentWord.slice(0, displayText.length - 1));
+        setTypingSpeed(70);
+      } else {
+        setIsDeleting(false);
+        setCurrentIndex((index) => (index + 1) % learningPaths.length);
+        setTypingSpeed(260);
+      }
+    }, typingSpeed);
+
+    return () => window.clearTimeout(timer);
+  }, [currentIndex, displayText, isDeleting, typingSpeed]);
 
   return (
-    <section
-      className="relative min-h-screen flex items-center overflow-hidden pt-28 pb-20"
-      style={{ background: 'linear-gradient(155deg, #f8faff 0%, #eef5ff 30%, #f0fdf4 65%, #fefce8 100%)' }}
-    >
-      {/* Background blobs */}
-      <Box className="absolute top-16 right-16 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-amber-200/45 to-orange-200/25 blur-3xl pointer-events-none" />
-      <Box className="absolute bottom-16 left-0 w-[320px] h-[320px] rounded-full bg-gradient-to-br from-emerald-200/35 to-blue-200/25 blur-3xl pointer-events-none" />
+    <section id="home" className="relative overflow-hidden bg-[#fff8f4]">
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.045]">
+        <span className="font-[var(--font-japanese)] text-[44vw] font-bold leading-none text-[#835500]">
+          {'\u65c5'}
+        </span>
+      </div>
 
-      <Container size="xl" className="relative z-10 w-full">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-16 lg:gap-20">
-
-          {/* Left Content */}
-          <div className="flex flex-col gap-7 w-full md:w-[56%] animate-fadeInUp">
-
-            {/* Top badge */}
-            <div>
-              <Badge
-                variant="white"
-                color="blue"
-                size="md"
-                radius="md"
-                className="shadow-sm border border-blue-100/80 py-3 px-4 text-blue-600 font-semibold tracking-wide uppercase text-xs"
-              >
-                NEW: TORISHO MOBILE APP
-              </Badge>
-            </div>
-
-            {/* Headings */}
-            <div className="flex flex-col gap-1">
-              <Title
-                order={1}
-                className={`${displayFont.className} text-[52px] md:text-[64px] font-extrabold text-gray-900 leading-[1.05] tracking-tight`}
-              >
-                Your all-in-one
-              </Title>
-              <Title
-                order={1}
-                className={`${displayFont.className} text-[52px] md:text-[64px] font-extrabold text-gray-900 leading-[1.05] tracking-tight`}
-              >
-                platform for Japanese
-              </Title>
-              <div className="min-h-[80px] md:min-h-[90px] flex items-center mt-1">
-                <Text
-                  component="span"
-                  variant="gradient"
-                  gradient={{ from: 'blue', to: 'cyan' }}
-                  className={`${displayFont.className} text-[52px]! md:text-[64px]! font-extrabold inline-block leading-none tracking-tight`}
-                >
-                  {displayText}
-                  <span className="animate-blink text-gray-300 font-thin ml-1">|</span>
-                </Text>
-              </div>
-            </div>
-
-            {/* CTA Group */}
-            <Group gap="xl" align="center" className="flex-wrap">
-              <Button
-                component={Link}
-                href="/register"
-                size="lg"
-                radius="lg"
-                variant="gradient"
-                gradient={{ from: 'blue', to: 'cyan' }}
-                rightSection={<span className="text-lg">→</span>}
-                className="cursor-pointer shadow-lg shadow-blue-500/25 hover:shadow-cyan-500/30 hover:scale-105 transition-all duration-200 font-bold"
-                styles={{
-                  root: {
-                    height: '52px',
-                    paddingLeft: '32px',
-                    paddingRight: '32px',
-                    fontSize: '17px',
-                    borderRadius: '14px',
-                  }
-                }}
-              >
-                Start Learning
-              </Button>
-
-              <Text c="dimmed" size="lg" fw={600} className="hidden sm:block">
-                — It&apos;s free to try!
-              </Text>
-            </Group>
-
-            {/* Sign in link */}
-            <Text c="dimmed" className="text-base font-semibold -mt-1">
-              Already registered?{' '}
-              <Link
-                href="/login"
-                className="text-blue-500 hover:text-blue-600 hover:underline font-extrabold transition-colors duration-150 cursor-pointer"
-              >
-                Sign in
-              </Link>
-            </Text>
+      <div className="torisho-shell relative z-10 grid min-h-[620px] grid-cols-1 items-center gap-14 py-12 md:grid-cols-[0.92fr_1fr] lg:min-h-[650px] lg:py-14">
+        <div className="flex max-w-[585px] flex-col items-start gap-7">
+          <div className="inline-flex rounded-full border border-[#d7c3ae] bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.1em] text-[#835500] shadow-sm">
+            JLPT N5 to N1 guided path
           </div>
 
-          {/* Right Content – Chicken Mascot */}
-          <div className="relative flex w-full md:w-[44%] items-center justify-center shrink-0 animate-fadeInUp-delay-1">
-            <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px]">
-              {/* Glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-300/25 via-yellow-200/20 to-red-300/20 rounded-full blur-2xl animate-pulse" />
-              {/* Chicken mascot image */}
-              <div className="relative w-full h-full rounded-full overflow-hidden shadow-2xl border-8 border-white/50 cursor-pointer transform hover:scale-105 hover:rotate-3 transition-transform duration-500">
-                <Image
-                  src="/images/torisho-mascot-hero.png"
-                  alt="Torisho Mascot"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </div>
+          <div className="flex flex-col gap-4">
+            <h1 className="torisho-display text-[46px] font-bold leading-[1.05] text-[#211a12] sm:text-[58px] lg:text-[66px]">
+              Master Japanese
+              <span className="mt-2 block min-h-[1.08em] text-[#835500]">
+                {displayText}
+                <span className="ml-1 inline-block animate-blink text-[#f5a623]">|</span>
+              </span>
+            </h1>
+            <p className="max-w-[500px] text-base leading-7 text-[#524534] sm:text-lg">
+              Structured JLPT paths from N5 to N1. Learn through adventure zones, daily quizzes,
+              dictionary lookup, flashcards, and speaking practice.
+            </p>
           </div>
 
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href="/register"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#f5a623] px-7 py-3 text-base font-bold text-[#291800] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#ffb955] hover:shadow-md"
+            >
+              Start Learning
+              <IconArrowRight size={18} stroke={2.2} />
+            </Link>
+            <Link
+              href="/dictionary"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#857462] bg-transparent px-7 py-3 text-base font-semibold text-[#211a12] transition-all hover:bg-[#fff1e4]"
+            >
+              <IconSearch size={18} stroke={2} />
+              Explore Dictionary
+            </Link>
+          </div>
         </div>
-      </Container>
+
+        <div className="relative mx-auto flex w-full max-w-[500px] items-center justify-center md:justify-self-end">
+          <div className="absolute inset-8 rounded-full bg-white/70 blur-3xl" />
+          <div className="relative aspect-square w-full max-w-[470px] overflow-hidden bg-white shadow-[0_18px_34px_rgba(54,37,20,0.16)] ring-1 ring-[#eee0d2]">
+            <Image
+              src={heroArtwork}
+              alt="Torisho chicken sensei studying Japanese"
+              fill
+              priority
+              unoptimized
+              sizes="(max-width: 768px) 86vw, 470px"
+              className="object-contain p-6"
+            />
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

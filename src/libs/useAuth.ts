@@ -1,26 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AuthService } from '../services/auth.service';
 import { User } from '../types/auth';
 
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const updateAuthState = () => {
-    const currentUser = AuthService.getCurrentUser();
-    const isAuth = AuthService.isAuthenticated();
-    
-    setUser(currentUser);
-    setIsAuthenticated(isAuth);
-    setLoading(false);
+function getAuthSnapshot() {
+  return {
+    user: AuthService.getCurrentUser(),
+    isAuthenticated: AuthService.isAuthenticated(),
+    loading: false,
   };
+}
+
+export function useAuth() {
+  const [authState, setAuthState] = useState<{
+    user: User | null;
+    isAuthenticated: boolean;
+    loading: boolean;
+  }>(() => {
+    if (typeof window === 'undefined') {
+      return { user: null, isAuthenticated: false, loading: true };
+    }
+
+    return getAuthSnapshot();
+  });
+
+  const updateAuthState = useCallback(() => {
+    setAuthState(getAuthSnapshot());
+  }, []);
 
   useEffect(() => {
-    updateAuthState();
-
     // Listen for storage changes (login/logout in other tabs or after navigation)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key?.startsWith('torisho_')) {
@@ -40,19 +49,17 @@ export function useAuth() {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('auth-change', handleAuthChange);
     };
-  }, []);
+  }, [updateAuthState]);
 
   const logout = async () => {
     try {
       await AuthService.logout();
-      setUser(null);
-      setIsAuthenticated(false);
+      setAuthState((current) => ({ ...current, user: null, isAuthenticated: false }));
     } catch (error) {
       console.error('Logout failed:', error);
-      setUser(null);
-      setIsAuthenticated(false);
+      setAuthState((current) => ({ ...current, user: null, isAuthenticated: false }));
     }
   };
 
-  return { user, isAuthenticated, loading, logout };
+  return { ...authState, logout };
 }

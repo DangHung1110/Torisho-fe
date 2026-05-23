@@ -6,7 +6,7 @@ import VideoCallRoom from '@/src/components/VideoCallRoom';
 import { useAuth } from '@/src/libs/useAuth';
 
 export default function RoomPage() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const params = useParams();
   const roomId = params.roomId as string;

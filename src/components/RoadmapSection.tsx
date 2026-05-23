@@ -1,236 +1,137 @@
 'use client';
 
-import { Container, Title, Text, SimpleGrid, Paper, Badge, Button, Group, ThemeIcon } from '@mantine/core';
+import Link from 'next/link';
+import {
+  IconArrowRight as ArrowRight,
+  IconCircleCheck as CheckCircle2,
+  IconCircleDashed as CircleDotDashed,
+  IconCompass as Compass,
+  IconFlag as Flag,
+} from '@tabler/icons-react';
 
-const roadmapItems = [
-  { title: 'Quick Study', type: 'MOBILE APP', status: '' },
-  { title: 'Adventure Dashboard (Alternative List View)', type: 'WEB & APP', status: '' },
-  { title: 'Study Friends Section', type: 'MOBILE APP', status: '' },
-  { title: 'Profile Page', type: 'MOBILE APP', status: '' },
-  { title: 'Recently Studied & Leeches Section', type: 'MOBILE APP', status: '' },
-  { title: 'JLPT Mock Exams - Listening Sections', type: 'CONTENT', status: '' },
-  { title: 'Cultural & Bonus Lessons (spanning all levels)', type: 'CONTENT', status: '' },
-  { title: 'Official Vocabulary Stories (mnemonics)', type: 'CONTENT', status: '' },
-  { title: 'Mini Game - Shiritori', type: 'WEB & APP', status: 'WIP' },
-  { title: 'Frequency-Based Study Lists & Dictionary Info', type: 'CONTENT', status: 'WIP' },
-  { title: 'Mobile Apps - General Launch (out of Early Access!)', type: 'MOBILE APP', status: 'WIP' },
-  { title: 'Advanced (N2) Content Done!', type: 'CONTENT', status: 'WIP' }
+const phaseFive = [
+  { title: 'Quick Study', type: 'Mobile App', status: 'Planned' },
+  { title: 'Adventure Dashboard alternative list view', type: 'Web & App', status: 'Planned' },
+  { title: 'Study Friends section', type: 'Mobile App', status: 'Planned' },
+  { title: 'JLPT mock exams - listening sections', type: 'Content', status: 'Planned' },
+  { title: 'Mini Game - Shiritori', type: 'Web & App', status: 'WIP' },
+  { title: 'Frequency-based study lists and dictionary info', type: 'Content', status: 'WIP' },
 ];
 
-const phase6Items = [
-  'Kanji (& Kana) Writing Practice',
-  'Quests (Daily, Weekly and Permanent Challenges & Study Goals)',
-  'Houses & Deities (Study Clans)',
-  'Expert (N1) Content Start!',
-  'JLPT Mock Exams - N1',
-  'Personal Notebook (Note-taking system)',
-  'Reading Exercises Rework',
-  'Torisho Cosmetics (skins)',
-  'Tools - JLPT Mock Exams',
-  'Browser Lookup/Mining Extension',
-  'MPV (video player) Mining Plugin',
-  'Manga Study Lists'
+const phaseSix = [
+  'Kanji and kana writing practice',
+  'Daily, weekly, and permanent quests',
+  'Study clans and friend groups',
+  'Expert N1 content start',
+  'Personal notebook system',
+  'Browser lookup and mining extension',
 ];
 
-// Phase SVG icons
-const SandDunesIcon = () => (
-  <svg viewBox="0 0 64 64" fill="none" className="w-10 h-10 md:w-14 md:h-14 drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 44 Q16 28 28 36 Q40 44 52 28 L60 32 L60 60 L4 60 Z" fill="white" fillOpacity="0.9" />
-    <circle cx="46" cy="18" r="10" fill="white" fillOpacity="0.8" />
-    <path d="M38 18 Q46 10 54 18" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeOpacity="0.5" />
-  </svg>
-);
-
-const CompassIcon = () => (
-  <svg viewBox="0 0 64 64" fill="none" className="w-10 h-10 md:w-14 md:h-14 drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="32" cy="32" r="26" stroke="white" strokeWidth="3" strokeOpacity="0.9" />
-    <circle cx="32" cy="32" r="4" fill="white" fillOpacity="0.85" />
-    <path d="M32 14 L36 30 L32 34 L28 30 Z" fill="white" fillOpacity="0.9" />
-    <path d="M32 50 L28 34 L32 30 L36 34 Z" fill="white" fillOpacity="0.5" />
-    <path d="M14 32 L30 28 L34 32 L30 36 Z" fill="white" fillOpacity="0.5" />
-    <path d="M50 32 L34 36 L30 32 L34 28 Z" fill="white" fillOpacity="0.9" />
-  </svg>
-);
+const typeTone: Record<string, string> = {
+  'Mobile App': 'bg-[#ffdad6] text-[#93000a]',
+  'Web & App': 'bg-[#c4e7ff] text-[#004d6a]',
+  Content: 'bg-[#ddf6e9] text-[#006b5f]',
+};
 
 export default function RoadmapSection() {
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'MOBILE APP': return 'red';
-      case 'WEB & APP': return 'blue';
-      case 'CONTENT': return 'green';
-      default: return 'gray';
-    }
-  };
-
-  const getStatusDot = (status: string) => {
-    if (status === 'WIP') return 'bg-amber-400';
-    return 'bg-emerald-400';
-  };
-
   return (
-    <section id="roadmap" className="py-24 md:py-28 bg-white">
-      <Container size="xl">
-
-        {/* Section heading */}
-        <div className="text-center mb-14">
-          <Title
-            order={2}
-            className="text-5xl md:text-6xl font-black text-gray-900 mb-4 tracking-tight"
-          >
-            Roadmap
-          </Title>
-          <Text size="lg" c="dimmed" className="max-w-2xl mx-auto">
-            See what else is coming to Torisho in the near future!
-          </Text>
+    <section id="roadmap" className="bg-white py-12 sm:py-16">
+      <div className="torisho-shell">
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <p className="torisho-eyebrow mb-3">Roadmap</p>
+          <h2 className="torisho-section-title">What Comes Next</h2>
+          <p className="torisho-section-copy mx-auto mt-3 max-w-2xl">
+            The next Torisho phases focus on faster study loops, richer social practice, stronger
+            JLPT coverage, and better tools for mining real Japanese.
+          </p>
         </div>
 
-        {/* Show Previous Phases */}
-        <div className="text-center mb-12">
-          <Button
-            variant="light"
-            color="blue"
-            size="md"
-            radius="xl"
-            className="cursor-pointer hover:scale-105 transition-transform duration-150 font-semibold"
-          >
-            Show Previous Phases ↑
-          </Button>
-        </div>
-
-        {/* Phase 5 */}
-        <div className="mb-16">
-          {/* Phase 5 header — matches Phase 6 style */}
-          <Group className="mb-10" gap="lg" align="center">
-            <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-red-400 via-orange-300 to-amber-400 flex items-center justify-center shadow-xl flex-shrink-0 border-4 border-white ring-1 ring-red-200">
-              <SandDunesIcon />
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+          <article className="rounded-lg border border-[#d7c3ae] bg-[#fff8f4] p-6 shadow-[0_6px_18px_rgba(26,20,16,0.05)] sm:p-8">
+            <div className="mb-7 flex items-center gap-4">
+              <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#f5a623] text-white shadow-sm">
+                <Flag size={30} />
+              </span>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#835500]">Phase 5</p>
+                <h3 className="torisho-display text-2xl font-semibold text-[#211a12]">
+                  Traversing the Sands of Mastery
+                </h3>
+                <p className="mt-1 text-sm text-[#665744]">Q3 2025 to 2026</p>
+              </div>
             </div>
-            <div>
-              <Text c="red" fw={700} size="xs" className="mb-1 uppercase tracking-widest">
-                PHASE 5
-              </Text>
-              <Title order={3} className="text-3xl md:text-4xl font-black text-red-500 mb-1 tracking-tight">
-                Traversing the Sands of Mastery..
-              </Title>
-              <Text size="sm" c="dimmed" fw={500}>Q3 2025–2026</Text>
-            </div>
-          </Group>
 
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" className="mb-4">
-            {roadmapItems.map((item, index) => (
-              <Paper
-                key={index}
-                p="md"
-                radius="lg"
-                className="flex items-center gap-4 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all duration-200 bg-white"
-              >
-                {/* Status dot indicator */}
-                <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getStatusDot(item.status)}`} />
-
-                <div className="flex-1 min-w-0">
-                  <Badge
-                    color={getTypeColor(item.type)}
-                    variant="light"
-                    size="xs"
-                    className="mb-1.5"
+            <div className="grid grid-cols-1 gap-3">
+              {phaseFive.map((item) => {
+                const isWip = item.status === 'WIP';
+                return (
+                  <div
+                    key={item.title}
+                    className="flex items-start gap-3 rounded-md border border-[#eee0d2] bg-white px-4 py-3"
                   >
-                    {item.type}
-                  </Badge>
-                  <Text fw={600} size="sm" className="text-gray-800 leading-snug">
-                    {item.title}
-                  </Text>
-                </div>
-
-                {item.status && (
-                  <Badge color="pink" variant="light" size="sm" className="flex-shrink-0">
-                    {item.status}
-                  </Badge>
-                )}
-              </Paper>
-            ))}
-          </SimpleGrid>
-
-          {/* Legend */}
-          <Group gap="lg" className="mt-5 pl-1">
-            <Group gap="xs" align="center">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-              <Text size="xs" c="dimmed" fw={500}>Planned</Text>
-            </Group>
-            <Group gap="xs" align="center">
-              <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-              <Text size="xs" c="dimmed" fw={500}>In Progress (WIP)</Text>
-            </Group>
-          </Group>
-        </div>
-
-        {/* Phase 6 */}
-        <div className="mb-16">
-          <Group className="mb-10" gap="lg" align="center">
-            <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-purple-400 via-violet-400 to-indigo-500 flex items-center justify-center shadow-xl flex-shrink-0 border-4 border-white ring-1 ring-purple-200">
-              <CompassIcon />
+                    {isWip ? (
+                      <CircleDotDashed className="mt-0.5 flex-shrink-0 text-[#f5a623]" size={18} />
+                    ) : (
+                      <CheckCircle2 className="mt-0.5 flex-shrink-0 text-[#3fb27f]" size={18} />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${typeTone[item.type]}`}>
+                        {item.type}
+                      </span>
+                      <p className="mt-2 text-sm font-semibold leading-6 text-[#211a12]">{item.title}</p>
+                    </div>
+                    {isWip && (
+                      <span className="rounded-full bg-[#fff1e4] px-2 py-1 text-[11px] font-bold text-[#835500]">
+                        WIP
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div>
-              <Text c="grape" fw={800} size="xs" className="mb-1 tracking-widest uppercase">
-                PHASE 6
-              </Text>
-              <Title order={3} className="text-3xl md:text-4xl font-black text-purple-600 mb-1 tracking-tight">
-                The Great Beyond
-              </Title>
-              <Text size="sm" c="dimmed" fw={500}>2026 &amp; Beyond</Text>
-            </div>
-          </Group>
+          </article>
 
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-            {phase6Items.map((item, index) => (
-              <Paper
-                key={index}
-                p="md"
-                radius="lg"
-                className="group border border-gray-100 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                style={{ borderLeft: '4px solid #e9d5ff' }}
-              >
+          <article className="rounded-lg border border-[#d7c3ae] bg-[#fffdfb] p-6 shadow-[0_6px_18px_rgba(26,20,16,0.05)] sm:p-8">
+            <div className="mb-7 flex items-center gap-4">
+              <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#9b72cf] text-white shadow-sm">
+                <Compass size={30} />
+              </span>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#6d45a8]">Phase 6</p>
+                <h3 className="torisho-display text-2xl font-semibold text-[#211a12]">
+                  The Great Beyond
+                </h3>
+                <p className="mt-1 text-sm text-[#665744]">2026 and beyond</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {phaseSix.map((item) => (
                 <div
-                  className="transition-colors duration-150"
-                  style={{ '--hover-color': '#7c3aed' } as React.CSSProperties}
+                  key={item}
+                  className="rounded-md border border-[#eee0d2] bg-[#fff8f4] px-4 py-4 text-sm font-semibold leading-6 text-[#524534] transition-colors hover:border-[#d7c3ae] hover:bg-white"
                 >
-                  <Text
-                    fw={600}
-                    size="sm"
-                    className="leading-snug text-gray-600 group-hover:text-purple-700 transition-colors duration-150"
-                  >
-                    {item}
-                  </Text>
+                  {item}
                 </div>
-              </Paper>
-            ))}
-          </SimpleGrid>
-        </div>
-
-        {/* And More TBA */}
-        <div className="mt-8 text-center">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 px-6 py-14 text-white shadow-2xl sm:px-10 md:py-16">
-            <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl" />
-            <div className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
-
-            <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-5 md:gap-6">
-              <Title order={3} className="text-3xl font-black tracking-tight md:text-4xl lg:text-5xl">
-                And More TBA
-              </Title>
-              <Text size="lg" className="text-center font-medium text-gray-400">
-                Don&apos;t miss anything on our journey!
-              </Text>
-              <Button
-                size="md"
-                radius="xl"
-                variant="white"
-                className="cursor-pointer mt-1 h-12 shrink-0 px-8 font-bold text-gray-900 shadow-xl transition-all duration-200 hover:scale-[1.03] md:h-14 md:px-10"
-              >
-                Sign up now! →
-              </Button>
+              ))}
             </div>
-          </div>
-        </div>
 
-      </Container>
+            <div className="mt-7 rounded-lg bg-[#211a12] px-5 py-5 text-white">
+              <h4 className="torisho-display text-2xl font-semibold">And More TBA</h4>
+              <p className="mt-2 text-sm leading-6 text-white/70">
+                Future releases will keep expanding lessons, tools, and community practice.
+              </p>
+              <Link
+                href="/register"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f5a623] px-5 py-2.5 text-sm font-bold text-[#291800] hover:bg-[#ffb955]"
+              >
+                Sign up now
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </article>
+        </div>
+      </div>
     </section>
   );
 }

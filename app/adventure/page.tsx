@@ -1,146 +1,134 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Title, Text, Button, TextInput,
-  ActionIcon, Loader,
-} from '@mantine/core';
-import {
-  IconSearch, IconBookmark, IconArrowDown, IconChevronDown,
-  IconMap, IconChevronRight, IconInfoCircle,
+  IconArrowRight,
+  IconBook2,
+  IconChevronDown,
+  IconCircleCheck,
+  IconLock,
+  IconMap,
+  IconSearch,
 } from '@tabler/icons-react';
-import DashboardHeader from '../../src/components/DashboardHeader';
-import { useAuth } from '../../src/libs/useAuth';
-import { LearningService } from '../../src/services/learning.service';
+import LearningShell from '@/src/components/LearningShell';
+import { useAuth } from '@/src/libs/useAuth';
+import { LearningService } from '@/src/services/learning.service';
 import {
   ChapterLessonsResponse,
+  ChapterListItem,
   LevelChaptersResponse,
-} from '../../src/types/learning';
-import { JLPTLevel } from '../../src/types/room';
+  LessonListItem,
+} from '@/src/types/learning';
+import { JLPTLevel } from '@/src/types/room';
 
-type AdventureLevelCode = 'PRE-N5' | JLPTLevel;
-
-type AdventureItem = {
+type LevelTone = {
   title: string;
-  level: AdventureLevelCode;
-  image: string;
-  info: string;
-  expandable: boolean;
+  description: string;
+  color: string;
+  soft: string;
+  text: string;
+  chapters: string;
 };
 
-const adventures: AdventureItem[] = [
-  {
-    title: 'Isle of New Beginnings',
-    level: 'PRE-N5',
-    image: '/images/adventure/pre-n5-banner.svg',
-    info: 'Start your journey here!',
-    expandable: false,
+const journeyArtwork =
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDRtRsDkVizsE-min34jfG6UasXsHIPgc2qpgQYZJjUm7pCTbliMPUjxG_8rjS56gy0zmeXEFc1yzET2jh2UGphRInW-pgVXrKRlvr8MEFEVhXGA9FU-Cy9-A4TfbzfjBt1ni2pVa1NOyaxtglZpjJjpS1rsIP1BRpbsmHAOUcRft86DIiRrbM-LIZkvBYoXHpnnJMS-TvUzgn2PvUTLyUHoTqHAVy4YxozJ0QSBjHnMoKiuy76ACSTbL3wNrCPOpS9RurarvxD63s';
+
+const levelOrder = [JLPTLevel.N5, JLPTLevel.N4, JLPTLevel.N3, JLPTLevel.N2, JLPTLevel.N1];
+
+const levelMeta: Record<JLPTLevel, LevelTone> = {
+  [JLPTLevel.N5]: {
+    title: 'Basics & Foundations',
+    description: 'Start with kana, greetings, core particles, and everyday sentence patterns.',
+    color: '#00796b',
+    soft: '#e4f6ef',
+    text: '#005047',
+    chapters: '12 Chapters • 48 Lessons',
   },
-  {
-    title: 'Fledgling Forest',
-    level: JLPTLevel.N5,
-    image: '/images/adventure/n5-banner.svg',
-    info: 'Master the basics.',
-    expandable: true,
+  [JLPTLevel.N4]: {
+    title: 'Everyday Communication',
+    description: 'Build natural travel, school, work, and daily conversation patterns.',
+    color: '#00658a',
+    soft: '#e4f4fb',
+    text: '#004c69',
+    chapters: '15 Chapters • 60 Lessons',
   },
-  {
-    title: 'Depths of Devotion',
-    level: JLPTLevel.N4,
-    image: '/images/adventure/n4-banner.svg',
-    info: 'Learn deeper concepts.',
-    expandable: true,
+  [JLPTLevel.N3]: {
+    title: 'Intermediate Fluency',
+    description: 'Connect ideas with longer readings, richer grammar, and stronger kanji habits.',
+    color: '#5b8fd5',
+    soft: '#eaf3ff',
+    text: '#255b90',
+    chapters: '18 Chapters • 72 Lessons',
   },
-  {
-    title: 'Jungle of Tenacity',
-    level: JLPTLevel.N3,
-    image: '/images/adventure/n3-banner.svg',
-    info: 'Things get wild here.',
-    expandable: true,
+  [JLPTLevel.N2]: {
+    title: 'Advanced Reading',
+    description: 'Handle essays, news language, nuanced grammar, and professional vocabulary.',
+    color: '#f5a623',
+    soft: '#fff1d6',
+    text: '#835500',
+    chapters: '20 Chapters • 80 Lessons',
   },
-  {
-    title: 'Sands of Mastery',
-    level: JLPTLevel.N2,
-    image: '/images/adventure/n2-banner.svg',
-    info: 'The final frontier.',
-    expandable: true,
+  [JLPTLevel.N1]: {
+    title: 'Mastery & Nuance',
+    description: 'Refine precision, literary expression, advanced kanji, and fast comprehension.',
+    color: '#9b72cf',
+    soft: '#f1e9fb',
+    text: '#5f3b8f',
+    chapters: '22 Chapters • 88 Lessons',
   },
-  {
-    title: 'Peak of Enlightenment',
-    level: JLPTLevel.N1,
-    image: '/images/adventure/n1-banner.svg',
-    info: 'Master nuance and advanced reading.',
-    expandable: true,
-  },
+};
+
+const fallbackChapters: ChapterListItem[] = [
+  { id: 'n5-1', title: 'Greetings & Introductions', order: 1, lessonCount: 3 },
+  { id: 'n5-2', title: 'Daily Routines', order: 2, lessonCount: 3 },
+  { id: 'n5-3', title: 'Weekend Plans', order: 3, lessonCount: 3 },
 ];
 
-const isJlptLevel = (level: AdventureLevelCode): level is JLPTLevel =>
-  level !== 'PRE-N5';
+const fallbackLessons: LessonListItem[] = [
+  {
+    id: 'fallback-1',
+    slug: 'lesson-1-time-action',
+    title: 'Time & Action',
+    order: 1,
+    sourceLevel: JLPTLevel.N5,
+    hasQuiz: true,
+    vocabularyCount: 12,
+    grammarCount: 2,
+    readingCount: 1,
+  },
+  {
+    id: 'fallback-2',
+    slug: 'lesson-2-describing-places',
+    title: 'Describing Places',
+    order: 2,
+    sourceLevel: JLPTLevel.N5,
+    hasQuiz: true,
+    vocabularyCount: 14,
+    grammarCount: 1,
+    readingCount: 1,
+  },
+];
 
 const createChapterKey = (level: JLPTLevel, chapterOrder: number) =>
   `${level}-${chapterOrder}`;
 
-const getLevelTone = (level: JLPTLevel) => {
-  switch (level) {
-    case JLPTLevel.N5:
-      return {
-        badge: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-        chip: 'bg-emerald-50 text-emerald-700',
-        soft: 'bg-emerald-50/55',
-        hover: 'hover:border-emerald-200 hover:bg-emerald-50/40',
-      };
-    case JLPTLevel.N4:
-      return {
-        badge: 'bg-sky-50 text-sky-700 border-sky-100',
-        chip: 'bg-sky-50 text-sky-700',
-        soft: 'bg-sky-50/55',
-        hover: 'hover:border-sky-200 hover:bg-sky-50/40',
-      };
-    case JLPTLevel.N3:
-      return {
-        badge: 'bg-teal-50 text-teal-700 border-teal-100',
-        chip: 'bg-teal-50 text-teal-700',
-        soft: 'bg-teal-50/55',
-        hover: 'hover:border-teal-200 hover:bg-teal-50/40',
-      };
-    case JLPTLevel.N2:
-      return {
-        badge: 'bg-amber-50 text-amber-700 border-amber-100',
-        chip: 'bg-amber-50 text-amber-700',
-        soft: 'bg-amber-50/55',
-        hover: 'hover:border-amber-200 hover:bg-amber-50/40',
-      };
-    case JLPTLevel.N1:
-      return {
-        badge: 'bg-indigo-50 text-indigo-700 border-indigo-100',
-        chip: 'bg-indigo-50 text-indigo-700',
-        soft: 'bg-indigo-50/55',
-        hover: 'hover:border-indigo-200 hover:bg-indigo-50/40',
-      };
-  }
-};
-
 export default function AdventurePage() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
-
-  const [openLevel, setOpenLevel] = useState<JLPTLevel | null>(null);
+  const [openLevel, setOpenLevel] = useState<JLPTLevel>(JLPTLevel.N5);
   const [chaptersByLevel, setChaptersByLevel] = useState<
     Partial<Record<JLPTLevel, LevelChaptersResponse>>
   >({});
-  const [levelErrors, setLevelErrors] = useState<
-    Partial<Record<JLPTLevel, string | null>>
-  >({});
+  const [levelErrors, setLevelErrors] = useState<Partial<Record<JLPTLevel, string | null>>>({});
   const [loadingLevel, setLoadingLevel] = useState<JLPTLevel | null>(null);
-
-  const [openChapterKey, setOpenChapterKey] = useState<string | null>(null);
+  const [openChapterKey, setOpenChapterKey] = useState(createChapterKey(JLPTLevel.N5, 2));
   const [lessonsByChapterKey, setLessonsByChapterKey] = useState<
     Record<string, ChapterLessonsResponse>
   >({});
   const [loadingChapterKey, setLoadingChapterKey] = useState<string | null>(null);
-  const [chapterErrors, setChapterErrors] = useState<Record<string, string | null>>(
-    {}
-  );
+  const [chapterErrors, setChapterErrors] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -148,72 +136,56 @@ export default function AdventurePage() {
     }
   }, [isAuthenticated, loading, router]);
 
-  const handleToggleLevel = async (level: AdventureLevelCode) => {
-    if (!isJlptLevel(level)) {
-      return;
-    }
+  const loadLevel = useCallback(
+    async (level: JLPTLevel) => {
+      if (chaptersByLevel[level] || loadingLevel === level) {
+        return;
+      }
 
-    if (openLevel === level) {
-      setOpenLevel(null);
-      setOpenChapterKey(null);
-      return;
-    }
+      setLoadingLevel(level);
+      setLevelErrors((prev) => ({ ...prev, [level]: null }));
 
+      try {
+        const response = await LearningService.getLevelChapters(level);
+        setChaptersByLevel((prev) => ({ ...prev, [level]: response }));
+      } catch (error) {
+        setLevelErrors((prev) => ({
+          ...prev,
+          [level]: error instanceof Error ? error.message : 'Failed to load chapters',
+        }));
+      } finally {
+        setLoadingLevel(null);
+      }
+    },
+    [chaptersByLevel, loadingLevel]
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      void loadLevel(JLPTLevel.N5);
+    }
+  }, [isAuthenticated, loadLevel]);
+
+  const handleToggleLevel = (level: JLPTLevel) => {
     setOpenLevel(level);
-    setOpenChapterKey(null);
-
-    if (chaptersByLevel[level] || loadingLevel === level) {
-      return;
-    }
-
-    setLoadingLevel(level);
-    setLevelErrors((prev) => ({
-      ...prev,
-      [level]: null,
-    }));
-
-    try {
-      const response = await LearningService.getLevelChapters(level);
-      setChaptersByLevel((prev) => ({
-        ...prev,
-        [level]: response,
-      }));
-    } catch (error) {
-      setLevelErrors((prev) => ({
-        ...prev,
-        [level]: error instanceof Error ? error.message : 'Failed to load chapters',
-      }));
-    } finally {
-      setLoadingLevel(null);
-    }
+    void loadLevel(level);
   };
 
   const handleToggleChapter = async (level: JLPTLevel, chapterOrder: number) => {
     const chapterKey = createChapterKey(level, chapterOrder);
 
-    if (openChapterKey === chapterKey) {
-      setOpenChapterKey(null);
-      return;
-    }
-
-    setOpenChapterKey(chapterKey);
+    setOpenChapterKey((current) => (current === chapterKey ? '' : chapterKey));
 
     if (lessonsByChapterKey[chapterKey]) {
       return;
     }
 
     setLoadingChapterKey(chapterKey);
-    setChapterErrors((prev) => ({
-      ...prev,
-      [chapterKey]: null,
-    }));
+    setChapterErrors((prev) => ({ ...prev, [chapterKey]: null }));
 
     try {
       const response = await LearningService.getChapterLessons(level, chapterOrder);
-      setLessonsByChapterKey((prev) => ({
-        ...prev,
-        [chapterKey]: response,
-      }));
+      setLessonsByChapterKey((prev) => ({ ...prev, [chapterKey]: response }));
     } catch (error) {
       setChapterErrors((prev) => ({
         ...prev,
@@ -224,332 +196,322 @@ export default function AdventurePage() {
     }
   };
 
-  const handleOpenLesson = (slug: string) => {
-    router.push(`/adventure/lessons/${slug}`);
-  };
-
-  if (loading) {
+  if (loading || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <Loader color="orange" size="lg" />
-          <Text c="dimmed" size="sm">Loading your adventure...</Text>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-[#fff8f4] text-[#665744]">
+        Loading your adventure...
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  return (
+    <LearningShell active="adventure">
+      <div className="px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+        <div className="mx-auto max-w-[1160px] space-y-10">
+          <section className="overflow-hidden rounded-xl border border-[#d7c3ae] bg-white p-8 shadow-[0_12px_32px_rgba(26,20,16,0.05)] md:p-10">
+            <div className="grid items-center gap-8 md:grid-cols-[1fr_250px]">
+              <div>
+                <h1 className="torisho-display text-5xl font-bold leading-tight text-[#211a12]">
+                  Your JLPT Journey
+                </h1>
+                <p className="mt-4 text-2xl text-[#3d2a17]">Choose your path and start learning.</p>
+              </div>
+              <div className="relative mx-auto h-52 w-52 bg-[#fff8f4] shadow-[0_18px_38px_rgba(26,20,16,0.08)] ring-1 ring-[#d7c3ae]">
+                <Image
+                  src={journeyArtwork}
+                  alt="Torisho chicken sensei holding a map"
+                  fill
+                  priority
+                  unoptimized
+                  sizes="220px"
+                  className="object-contain p-4"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <label className="relative block w-full xl:w-[480px]">
+              <IconSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-[#3d2a17]" size={25} />
+              <input
+                type="search"
+                placeholder="Search lessons or chapters..."
+                className="h-[74px] w-full rounded-lg border border-[#d7c3ae] bg-white pl-16 pr-5 text-xl text-[#211a12] outline-none transition-shadow placeholder:text-[#857462] focus:shadow-[0_0_0_3px_rgba(245,166,35,0.2)]"
+              />
+            </label>
+
+            <div className="flex flex-wrap gap-3">
+              {['ALL', ...levelOrder].map((label) => (
+                <button
+                  key={label}
+                  className="h-10 rounded-full border border-[#d7c3ae] bg-white px-6 text-sm font-extrabold tracking-[0.12em] text-[#3d2a17] transition-colors hover:bg-[#fff1e4]"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex w-fit rounded-lg border border-[#d7c3ae] bg-white p-2 shadow-sm">
+              <button className="rounded-md bg-[#fff1e4] p-3 text-[#835500]" aria-label="List view">
+                <IconBook2 size={23} />
+              </button>
+              <button className="rounded-md p-3 text-[#3d2a17] hover:bg-[#fff1e4]" aria-label="Map view">
+                <IconMap size={23} />
+              </button>
+            </div>
+          </section>
+
+          <section className="space-y-7">
+            {levelOrder.map((level) => (
+              <LevelCard
+                key={level}
+                level={level}
+                isOpen={openLevel === level}
+                levelData={chaptersByLevel[level]}
+                levelError={levelErrors[level]}
+                loadingLevel={loadingLevel === level}
+                openChapterKey={openChapterKey}
+                lessonsByChapterKey={lessonsByChapterKey}
+                loadingChapterKey={loadingChapterKey}
+                chapterErrors={chapterErrors}
+                onToggleLevel={handleToggleLevel}
+                onToggleChapter={handleToggleChapter}
+                onOpenLesson={(slug) => router.push(`/adventure/lessons/${slug}`)}
+              />
+            ))}
+          </section>
+        </div>
+      </div>
+    </LearningShell>
+  );
+}
+
+type LevelCardProps = {
+  level: JLPTLevel;
+  isOpen: boolean;
+  levelData?: LevelChaptersResponse;
+  levelError?: string | null;
+  loadingLevel: boolean;
+  openChapterKey: string;
+  lessonsByChapterKey: Record<string, ChapterLessonsResponse>;
+  loadingChapterKey: string | null;
+  chapterErrors: Record<string, string | null>;
+  onToggleLevel: (level: JLPTLevel) => void;
+  onToggleChapter: (level: JLPTLevel, chapterOrder: number) => void;
+  onOpenLesson: (slug: string) => void;
+};
+
+function LevelCard({
+  level,
+  isOpen,
+  levelData,
+  levelError,
+  loadingLevel,
+  openChapterKey,
+  lessonsByChapterKey,
+  loadingChapterKey,
+  chapterErrors,
+  onToggleLevel,
+  onToggleChapter,
+  onOpenLesson,
+}: LevelCardProps) {
+  const meta = levelMeta[level];
+  const chapters = levelData?.chapters.length ? levelData.chapters : level === JLPTLevel.N5 ? fallbackChapters : [];
+  const progress = level === JLPTLevel.N5 ? 45 : 0;
+  const locked = [JLPTLevel.N3, JLPTLevel.N2, JLPTLevel.N1].includes(level);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-32">
-      <DashboardHeader />
-      <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
-        <div className="w-full max-w-[1040px]">
-          <div className="box-border mx-auto flex w-full max-w-[900px] flex-col gap-8 pt-8 sm:pt-10">
-          <div className="mx-auto mb-8 flex w-full flex-col items-center gap-10 text-center">
-            <Title
-              order={2}
-              className="w-full text-[1.75rem] font-extrabold leading-tight tracking-tight text-[#334155] sm:text-[1.9rem]"
-            >
-              The Adventure Dashboard
-            </Title>
+    <article className="overflow-hidden rounded-xl border border-[#d7c3ae] bg-white shadow-[0_12px_32px_rgba(26,20,16,0.05)]">
+      <button
+        type="button"
+        onClick={() => onToggleLevel(level)}
+        className="flex w-full flex-col gap-6 p-7 text-left transition-colors hover:bg-[#fffdfb] md:flex-row md:items-center md:justify-between md:p-9"
+      >
+        <div className="flex items-center gap-6">
+          <span
+            className="torisho-display flex h-20 w-20 shrink-0 items-center justify-center rounded-full text-4xl font-bold text-white"
+            style={{ backgroundColor: locked ? '#eee0d2' : meta.color, color: locked ? '#665744' : '#fff' }}
+          >
+            {level}
+          </span>
+          <span>
+            <span className="torisho-display flex items-center gap-3 text-3xl font-bold leading-tight">
+              {locked && <IconLock size={24} className="text-[#857462]" />}
+              {meta.title}
+            </span>
+            <span className="mt-2 block text-lg text-[#3d2a17]">
+              {levelData ? `${levelData.totalChapters} Chapters` : meta.chapters}
+            </span>
+          </span>
+        </div>
 
-            <TextInput
-              placeholder="Search.."
-              radius="xl"
-              size="md"
-              className="w-full max-w-[350px] rounded-full border border-gray-200/90 bg-white pl-11 text-[14px] shadow-[0_2px_12px_rgba(15,23,42,0.06)] focus:border-blue-200 focus:bg-white"
-              leftSection={<IconSearch size={18} className="text-gray-400" stroke={1.5} />}
-              rightSectionWidth={44}
-              rightSection={
-                <button
-                  type="button"
-                  className="mr-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#5bb8f5] text-white shadow-sm transition-transform hover:scale-[1.02]"
-                  aria-label="Search"
-                >
-                  <IconSearch size={16} stroke={2} />
-                </button>
-              }
-              classNames={{
-                input:
-                  'h-10 rounded-full border border-gray-200/90 bg-white pl-11 text-[14px] shadow-[0_2px_12px_rgba(15,23,42,0.06)]',
-              }}
-            />
-
-            <Button
-              leftSection={<IconBookmark size={16} stroke={1.5} />}
-              variant="default"
-              radius="xl"
-              size="sm"
-              className="h-9 border border-gray-200/90 bg-[#f1f5f9] px-4 text-[14px] font-semibold text-gray-700 hover:bg-[#e8edf3]"
-            >
-              My Bookmarks
-            </Button>
-
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 border-0 bg-transparent p-0 text-[14px] font-semibold text-gray-500 transition-colors hover:text-gray-800"
-            >
-              Show Quick Filters
-              <IconChevronDown size={18} stroke={2} className="text-gray-400" aria-hidden />
-            </button>
-
-            <div className="flex w-[300px] flex-col gap-1.5">
-              <Button
-                leftSection={<IconArrowDown size={15} stroke={1.75} />}
-                radius="xl"
-                size="sm"
-                color="blue"
-                variant="filled"
-                className="h-9 w-full bg-[#5bb8f5] text-[14px] font-semibold hover:bg-[#4aadf0]"
-              >
-                Scroll to Current Tile
-              </Button>
-              <Button
-                leftSection={<div className="h-2.5 w-2.5 rounded-full border-2 border-white" />}
-                radius="xl"
-                size="sm"
-                color="green"
-                variant="filled"
-                className="h-9 w-full bg-[#4acb8b] text-[14px] font-semibold hover:bg-[#3dbe7f]"
-              >
-                Open Current Tile Modal
-              </Button>
-            </div>
+        <div className="w-full md:w-80">
+          <div className="mb-2 flex justify-between text-sm font-extrabold tracking-[0.08em]">
+            <span>Progress</span>
+            <span>{progress}%</span>
           </div>
+          <div className="h-2 overflow-hidden rounded-full bg-[#eee0d2]">
+            <div className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: meta.color }} />
+          </div>
+          <IconChevronDown
+            className={`ml-auto mt-4 text-[#665744] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            size={24}
+          />
+        </div>
+      </button>
 
-          <div className="flex w-full flex-col gap-6">
-            {adventures.map((adv) => {
-              const levelCode = isJlptLevel(adv.level) ? adv.level : null;
-              const isOpen = levelCode !== null && openLevel === levelCode;
-              const levelData = levelCode ? chaptersByLevel[levelCode] : null;
-              const levelError = levelCode ? levelErrors[levelCode] : null;
-              const levelIsLoading = levelCode !== null && loadingLevel === levelCode;
-              const tone = levelCode ? getLevelTone(levelCode) : null;
+      {isOpen && (
+        <div className="border-t border-[#d7c3ae] bg-[#fffdfb]">
+          {loadingLevel && chapters.length === 0 && <StateRow message="Loading chapters..." />}
+          {!loadingLevel && levelError && chapters.length === 0 && (
+            <StateRow message={levelError} tone="error" />
+          )}
+
+          {chapters.length > 0 &&
+            chapters.map((chapter, index) => {
+              const chapterKey = createChapterKey(level, chapter.order);
+              const chapterOpen = openChapterKey === chapterKey;
+              const chapterLoading = loadingChapterKey === chapterKey;
+              const chapterError = chapterErrors[chapterKey];
+              const lessonData = lessonsByChapterKey[chapterKey];
+              const lessons =
+                lessonData?.lessons.length ? lessonData.lessons : level === JLPTLevel.N5 && chapter.order === 2 ? fallbackLessons : [];
 
               return (
-                <section key={adv.level} className="flex w-full flex-col gap-3">
-                  <div
-                    onClick={() => void handleToggleLevel(adv.level)}
-                    className={`group relative h-28 w-full max-w-full shrink-0 overflow-hidden rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.10)] transition-all duration-300 hover:shadow-[0_5px_14px_rgba(15,23,42,0.16)] ${adv.expandable ? 'cursor-pointer' : 'cursor-default'}`}
-                    style={{
-                      background: `linear-gradient(to right, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.12) 60%), url(${adv.image}) center/cover no-repeat`,
-                    }}
+                <div key={chapter.id} className="border-b border-[#eee0d2] last:border-b-0">
+                  <button
+                    type="button"
+                    onClick={() => onToggleChapter(level, chapter.order)}
+                    className={`flex w-full items-center justify-between px-8 py-6 text-left transition-colors hover:bg-[#fff8f4] ${
+                      index === 1 ? 'border-l-4 border-[#835500] bg-white' : ''
+                    }`}
                   >
-                    <div className="relative z-10 flex h-full min-h-0 w-full items-center justify-between">
-                      <div className="min-w-0 flex-1">
-                        <Title
-                          order={4}
-                          className="truncate pl-6 text-[20px] font-bold leading-tight tracking-tight text-white"
-                          style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.6)' }}
-                        >
-                          {adv.title} ({adv.level})
-                        </Title>
-                      </div>
-
-                      <div className="flex h-full shrink-0 items-center gap-3 pr-4 text-white">
-                        <span className="rounded-full bg-white/90 px-3 py-1 text-[12px] font-semibold text-slate-700 shadow-sm">
-                          {adv.expandable
-                            ? levelData
-                              ? `${levelData.totalChapters} chapters`
-                              : 'Browse chapters'
-                            : 'Coming soon'}
-                        </span>
-
-                        {adv.expandable ? (
-                          isOpen ? (
-                            <IconChevronDown size={22} stroke={2.2} className="text-white/95" aria-hidden />
-                          ) : (
-                            <IconChevronRight size={22} stroke={2.2} className="text-white/95" aria-hidden />
-                          )
-                        ) : (
-                          <IconChevronRight size={22} stroke={2.2} className="text-white/95" aria-hidden />
-                        )}
-
-                        <ActionIcon
-                          variant="transparent"
-                          className="h-8 w-8 rounded-full border border-white/85 text-white/95 transition-all hover:bg-white/10 hover:text-white"
-                          radius="xl"
-                          size="md"
-                          aria-label="Zone information"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <IconInfoCircle size={18} stroke={2} />
-                        </ActionIcon>
-                      </div>
-                    </div>
-                  </div>
-
-                  {isOpen && levelCode && tone && (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_10px_26px_rgba(15,23,42,0.06)] sm:p-4">
-                      {levelIsLoading && (
-                        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
-                          <Loader size="sm" color="orange" />
-                          <Text size="sm" c="dimmed">
-                            Loading chapters...
-                          </Text>
-                        </div>
+                    <span className="flex items-center gap-4 text-2xl">
+                      {index === 0 ? (
+                        <IconCircleCheck size={29} className="text-[#00796b]" />
+                      ) : locked ? (
+                        <IconLock size={25} className="text-[#857462]" />
+                      ) : (
+                        <span
+                          className="h-7 w-7 rounded-full border-4"
+                          style={{ borderColor: index === 1 ? '#f5a623' : '#d7c3ae' }}
+                        />
                       )}
+                      <span className={locked ? 'text-[#857462]' : 'text-[#211a12]'}>
+                        Chapter {chapter.order}: {chapter.title}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-6 font-bold">
+                      {index === 0 ? '100%' : chapterOpen ? <IconChevronDown size={22} /> : <IconChevronDown className="-rotate-90" size={22} />}
+                    </span>
+                  </button>
 
-                      {!levelIsLoading && levelError && (
-                        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4">
-                          <Text size="sm" c="red">
-                            {levelError}
-                          </Text>
-                        </div>
+                  {chapterOpen && (
+                    <div className="space-y-5 bg-[#fff8f4] px-8 py-6 md:pl-16">
+                      {chapterLoading && <StateRow message="Loading lessons..." compact />}
+                      {!chapterLoading && chapterError && <StateRow message={chapterError} tone="error" compact />}
+                      {!chapterLoading &&
+                        !chapterError &&
+                        lessons.map((lesson, lessonIndex) => (
+                          <LessonRow
+                            key={lesson.id}
+                            lesson={lesson}
+                            highlighted={lessonIndex === 1}
+                            locked={locked || lessonIndex > 1}
+                            onOpenLesson={onOpenLesson}
+                          />
+                        ))}
+                      {!chapterLoading && !chapterError && lessons.length === 0 && (
+                        <StateRow message="Lessons will appear here when this chapter is ready." compact />
                       )}
-
-                      {!levelIsLoading &&
-                        !levelError &&
-                        levelData &&
-                        levelData.chapters.length > 0 && (
-                          <div className="flex flex-col gap-3">
-                            {levelData.chapters.map((chapter) => {
-                              const chapterKey = createChapterKey(levelCode, chapter.order);
-                              const isChapterOpen = openChapterKey === chapterKey;
-                              const lessonData = lessonsByChapterKey[chapterKey];
-                              const chapterIsLoading = loadingChapterKey === chapterKey;
-                              const chapterError = chapterErrors[chapterKey];
-
-                              return (
-                                <article
-                                  key={chapter.id}
-                                  className={`overflow-hidden rounded-xl border border-slate-200 ${tone.soft}`}
-                                >
-                                  <button
-                                    type="button"
-                                    onClick={() => void handleToggleChapter(levelCode, chapter.order)}
-                                    className="flex w-full items-center justify-between gap-4 bg-white/85 px-4 py-3 text-left transition-colors hover:bg-white"
-                                  >
-                                    <div className="flex min-w-0 items-center gap-3">
-                                      <span
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-[12px] font-bold ${tone.badge}`}
-                                      >
-                                        {chapter.order}
-                                      </span>
-                                      <div className="min-w-0">
-                                        <Text fw={700} className="truncate text-slate-900">
-                                          {chapter.title}
-                                        </Text>
-                                        <Text size="xs" c="dimmed">
-                                          {chapter.lessonCount} lessons
-                                        </Text>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex shrink-0 items-center gap-2">
-                                      <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${tone.chip}`}>
-                                        Chapter {chapter.order}
-                                      </span>
-                                      {isChapterOpen ? (
-                                        <IconChevronDown size={18} stroke={2.2} className="text-slate-500" />
-                                      ) : (
-                                        <IconChevronRight size={18} stroke={2.2} className="text-slate-500" />
-                                      )}
-                                    </div>
-                                  </button>
-
-                                  {isChapterOpen && (
-                                    <div className="border-t border-slate-200 bg-slate-50/75 p-3">
-                                      {chapterIsLoading && (
-                                        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4">
-                                          <Loader size="sm" color="orange" />
-                                          <Text size="sm" c="dimmed">
-                                            Loading lessons...
-                                          </Text>
-                                        </div>
-                                      )}
-
-                                      {!chapterIsLoading && chapterError && (
-                                        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4">
-                                          <Text size="sm" c="red">
-                                            {chapterError}
-                                          </Text>
-                                        </div>
-                                      )}
-
-                                      {!chapterIsLoading &&
-                                        !chapterError &&
-                                        lessonData &&
-                                        lessonData.lessons.length > 0 && (
-                                          <div className="flex flex-col gap-2">
-                                            {lessonData.lessons.map((lesson) => (
-                                              <button
-                                                key={lesson.id}
-                                                type="button"
-                                                onClick={() => handleOpenLesson(lesson.slug)}
-                                                className={`rounded-lg border border-slate-200 bg-white px-4 py-3 text-left transition-all ${tone.hover}`}
-                                              >
-                                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                                  <div className="min-w-0">
-                                                    <Text fw={700} className="leading-6 text-slate-900">
-                                                      Lesson {lesson.order}: {lesson.title}
-                                                    </Text>
-                                                    <Text size="xs" c="dimmed">
-                                                      {lesson.slug}
-                                                    </Text>
-                                                  </div>
-
-                                                  <div className="flex flex-wrap items-center justify-end gap-2">
-                                                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone.chip}`}>
-                                                      Vocab {lesson.vocabularyCount}
-                                                    </span>
-                                                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone.chip}`}>
-                                                      Grammar {lesson.grammarCount}
-                                                    </span>
-                                                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone.chip}`}>
-                                                      Reading {lesson.readingCount}
-                                                    </span>
-                                                    <IconChevronRight size={16} stroke={2.2} className="text-slate-400" />
-                                                  </div>
-                                                </div>
-                                              </button>
-                                            ))}
-                                          </div>
-                                        )}
-
-                                      {!chapterIsLoading &&
-                                        !chapterError &&
-                                        lessonData &&
-                                        lessonData.lessons.length === 0 && (
-                                          <Text size="sm" c="dimmed">
-                                            No lessons found for this chapter.
-                                          </Text>
-                                        )}
-                                    </div>
-                                  )}
-                                </article>
-                              );
-                            })}
-                          </div>
-                        )}
                     </div>
                   )}
-                </section>
+                </div>
               );
             })}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function LessonRow({
+  lesson,
+  highlighted,
+  locked,
+  onOpenLesson,
+}: {
+  lesson: LessonListItem;
+  highlighted?: boolean;
+  locked?: boolean;
+  onOpenLesson: (slug: string) => void;
+}) {
+  return (
+    <div
+      className={`flex flex-col gap-4 rounded-lg border bg-white p-5 md:flex-row md:items-center md:justify-between ${
+        highlighted ? 'border-[#f5a623] shadow-[0_0_0_2px_rgba(245,166,35,0.18)]' : 'border-[#d7c3ae]'
+      } ${locked ? 'opacity-60' : ''}`}
+    >
+      <div className="flex items-start gap-4">
+        {locked && <IconLock className="mt-1 text-[#857462]" size={24} />}
+        <div>
+          <h3 className="text-xl font-medium">
+            Lesson {lesson.order}: {lesson.title}
+          </h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-full bg-[#c4e7ff] px-3 py-1 text-xs font-bold uppercase text-[#004c69]">
+              Vocab
+            </span>
+            {lesson.grammarCount > 0 && (
+              <span className="rounded-full bg-[#ffdad6] px-3 py-1 text-xs font-bold uppercase text-[#93000a]">
+                Grammar
+              </span>
+            )}
+            {lesson.readingCount > 0 && (
+              <span className="rounded-full bg-[#62fae3] px-3 py-1 text-xs font-bold uppercase text-[#005047]">
+                Reading
+              </span>
+            )}
           </div>
         </div>
-        </div>
       </div>
+      {!locked && (
+        <button
+          type="button"
+          onClick={() => onOpenLesson(lesson.slug)}
+          className={`flex h-12 items-center justify-center gap-2 rounded-full px-8 text-lg font-medium transition-colors ${
+            highlighted
+              ? 'bg-[#f5a623] text-[#291800] hover:bg-[#ffb955]'
+              : 'border border-[#d7c3ae] bg-[#fff1e4] text-[#3d2a17] hover:bg-[#f4e6d8]'
+          }`}
+        >
+          {highlighted ? 'Continue' : 'Review'} <IconArrowRight size={18} />
+        </button>
+      )}
+    </div>
+  );
+}
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
-        <div className="pointer-events-auto">
-          <Button
-            leftSection={<IconMap size={16} stroke={1.5} />}
-            variant="filled"
-            color="violet"
-            radius="xl"
-            size="sm"
-            className="h-10 px-5 font-bold shadow-lg"
-          >
-            MAP
-          </Button>
-        </div>
-      </div>
+function StateRow({
+  message,
+  tone = 'default',
+  compact = false,
+}: {
+  message: string;
+  tone?: 'default' | 'error';
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-lg border px-5 py-4 text-sm font-bold ${
+        compact ? '' : 'm-6'
+      } ${
+        tone === 'error'
+          ? 'border-[#ffdad6] bg-[#fff1ef] text-[#93000a]'
+          : 'border-[#d7c3ae] bg-white text-[#665744]'
+      }`}
+    >
+      {message}
     </div>
   );
 }

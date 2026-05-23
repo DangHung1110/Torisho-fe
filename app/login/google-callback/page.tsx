@@ -78,7 +78,7 @@ export default function GoogleCallbackPage() {
           providerToken: idToken,
         });
 
-        router.replace('/adventure');
+        router.replace('/dashboard');
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : 'Unable to sign in with Google right now.';

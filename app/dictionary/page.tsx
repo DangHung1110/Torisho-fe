@@ -1,106 +1,59 @@
-// app/dictionary/page.tsx  ← Search Results Page
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Noto_Sans_JP } from 'next/font/google';
-import DashboardHeader from '../../src/components/DashboardHeader';
-import { dictionaryService } from '../../src/services/dictionary.service';
-import { WordSearchResult } from '../../src/types/dictionary';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  IconAdjustmentsHorizontal,
+  IconArrowRight,
+  IconSearch,
+} from '@tabler/icons-react';
+import LearningShell from '@/src/components/LearningShell';
+import { dictionaryService } from '@/src/services/dictionary.service';
+import { WordSearchResult } from '@/src/types/dictionary';
 
-const notoSansJp = Noto_Sans_JP({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-});
-
-// ─── Word Card (search result item) ────────────────────────────────────────
-function WordResultCard({ word, keyword }: { word: WordSearchResult; keyword: string }) {
-  const detailHref = keyword
-    ? `/dictionary/${word.id}?keyword=${encodeURIComponent(keyword)}`
-    : `/dictionary/${word.id}`;
-
-  return (
-    <Link
-      href={detailHref}
-      className="group flex w-full items-stretch gap-5 rounded-2xl border border-slate-100 bg-white px-6 py-5 shadow-sm transition-all duration-200 hover:border-blue-200 hover:shadow-md"
-    >
-      {/* Left: Kanji + reading */}
-      <div className="flex min-w-[80px] flex-col justify-center gap-0.5">
-        <span
-          className={`${notoSansJp.className} text-3xl font-bold leading-tight tracking-tight text-slate-900 transition-colors group-hover:text-blue-700`}
-        >
-          {word.kanji ?? word.kana}
-        </span>
-        {word.kanji && (
-          <span className={`${notoSansJp.className} text-sm text-slate-400`}>
-            {word.matchedReading ?? word.kana}
-          </span>
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="w-px self-stretch bg-slate-100" />
-
-      {/* Right: Tags + meanings */}
-      <div className="flex flex-1 flex-col justify-center gap-2">
-        {word.isCommon && (
-          <span className="w-fit rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 ring-1 ring-inset ring-emerald-200">
-            Common
-          </span>
-        )}
-        <p className="text-sm font-medium text-slate-700">
-          {word.primaryMeaning}
-        </p>
-      </div>
-
-      {/* Arrow */}
-      <div className="flex items-center self-center text-slate-300 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-blue-400">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 18l6-6-6-6" />
-        </svg>
-      </div>
-    </Link>
-  );
-}
-
-// ─── Skeleton ───────────────────────────────────────────────────────────────
-function SearchSkeleton() {
-  return (
-    <div className="animate-pulse space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-stretch gap-5 rounded-2xl border border-slate-100 bg-white px-6 py-5">
-          <div className="flex flex-col gap-2">
-            <div className="h-8 w-16 rounded-lg bg-slate-200" />
-            <div className="h-3.5 w-12 rounded bg-slate-100" />
-          </div>
-          <div className="w-px self-stretch bg-slate-100" />
-          <div className="flex flex-1 flex-col justify-center gap-2">
-            <div className="h-3 w-14 rounded-full bg-slate-100" />
-            <div className="h-4 w-48 rounded bg-slate-200" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Page ───────────────────────────────────────────────────────────────────
-function DictionarySearchPageContent() {
+function DictionaryPageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const keyword = useMemo(() => searchParams.get('keyword')?.trim() ?? '', [searchParams]);
-
+  const urlKeyword = useMemo(() => searchParams.get('keyword')?.trim() ?? '', [searchParams]);
+  const [query, setQuery] = useState(urlKeyword);
+  const [debouncedQuery, setDebouncedQuery] = useState(urlKeyword);
   const [results, setResults] = useState<WordSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    setQuery(urlKeyword);
+    setDebouncedQuery(urlKeyword);
+  }, [urlKeyword]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 280);
+
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
+    const nextUrl = debouncedQuery
+      ? `${pathname}?keyword=${encodeURIComponent(debouncedQuery)}`
+      : pathname;
+
+    if (debouncedQuery !== urlKeyword) {
+      router.replace(nextUrl, { scroll: false });
+    }
+  }, [debouncedQuery, pathname, router, urlKeyword]);
+
+  useEffect(() => {
     let active = true;
 
-    async function load() {
-      if (!keyword) {
+    const search = async () => {
+      if (!debouncedQuery) {
         setResults([]);
         setErrorMessage(null);
+        setIsLoading(false);
         return;
       }
 
@@ -108,115 +61,211 @@ function DictionarySearchPageContent() {
       setErrorMessage(null);
 
       try {
-        const words = await dictionaryService.search(keyword);
-        if (active) setResults(words);
-      } catch (err) {
+        const words = await dictionaryService.search(debouncedQuery);
+        if (active) {
+          setResults(words);
+        }
+      } catch (error) {
         if (active) {
           setResults([]);
-          setErrorMessage(err instanceof Error ? err.message : 'Unable to search right now.');
+          setErrorMessage(error instanceof Error ? error.message : 'Unable to search dictionary.');
         }
       } finally {
-        if (active) setIsLoading(false);
+        if (active) {
+          setIsLoading(false);
+        }
       }
-    }
+    };
 
-    void load();
-    return () => { active = false; };
-  }, [keyword]);
+    void search();
+
+    return () => {
+      active = false;
+    };
+  }, [debouncedQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
-      <DashboardHeader />
+    <LearningShell active="vocabulary">
+      <div className="px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+        <div className="mx-auto max-w-[1240px]">
+          <header>
+            <p className="mb-3 text-sm font-extrabold uppercase tracking-[0.16em] text-[#835500]">
+              Từ điển
+            </p>
+            <h1 className="torisho-display text-5xl font-bold leading-tight text-[#211a12] md:text-6xl">
+              Dictionary
+            </h1>
+            <div className="relative mt-8 max-w-5xl">
+              <IconSearch
+                className="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 text-[#857462]"
+                size={26}
+              />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="h-20 w-full rounded-full border border-[#d7c3ae] bg-[#fff8f4] pl-16 pr-6 text-xl text-[#211a12] shadow-[0_10px_28px_rgba(26,20,16,0.04)] outline-none transition-all placeholder:text-[#857462] focus:border-[#f5a623] focus:ring-4 focus:ring-[#f5a623]/20"
+                placeholder="Search kanji, kana, romaji, or English... e.g. 食べる, taberu, eat"
+                autoFocus
+              />
+            </div>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <IconAdjustmentsHorizontal size={18} className="text-[#857462]" />
+              <DisabledFilter label="Common words" />
+              <DisabledFilter label="JLPT level (N5-N1)" />
+              <DisabledFilter label="Part of speech" />
+            </div>
+          </header>
 
-      <main className="w-full pb-16 pt-8">
-        <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
-          <div className="w-full max-w-[1040px]">
-            {/* ── Centered narrow container ── */}
-            <div className="flex w-full justify-center">
-              <div className="w-full max-w-2xl">
+          {errorMessage && (
+            <div className="mt-8 rounded-xl border border-[#ffdad6] bg-[#fff1ef] px-5 py-4 text-[#93000a]">
+              {errorMessage}
+            </div>
+          )}
 
-                {/* Heading */}
-                <div className="mb-6">
-                  
-                  
-                  {keyword ? (
-                    <h1 className="mt-1 text-2xl font-bold text-slate-800">
-                      Results for{' '}
-                      <span className="text-blue-600">&ldquo;{keyword}&rdquo;</span>
-                    </h1>
-                  ) : (
-                    <h1 className="mt-1 text-2xl font-bold text-slate-800">
-                      Search Japanese words
-                    </h1>
-                  )}
-
-                  {errorMessage && (
-                    <p className="mt-3 rounded-xl bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-600">
-                      {errorMessage}
-                    </p>
-                  )}
+          <section className="mt-10">
+            {!debouncedQuery ? (
+              <div className="flex min-h-[360px] flex-col items-center justify-center rounded-xl border border-dashed border-[#d7c3ae] bg-white p-8 text-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#fff1e4] text-[#835500]">
+                  <IconSearch size={38} />
                 </div>
-
-                {/* Content */}
-                {!keyword ? (
-                  <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
-                    <p className="text-5xl leading-none">( ^_^ )</p>
-                    <p className="mt-5 text-lg font-semibold text-slate-700">Enter a keyword to start</p>
-                    <p className="mt-1.5 text-sm text-slate-400">Try: 標準, ひょうじゅん, standard</p>
-                  </div>
-                ) : isLoading ? (
-                  <SearchSkeleton />
-                ) : results.length === 0 ? (
-                  <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
-                    <p className="text-4xl leading-none">(o_o)</p>
-                    <p className="mt-4 text-base font-semibold text-slate-700">No words found</p>
-                    <p className="mt-1 text-sm text-slate-400">Try a different keyword or shorter phrase.</p>
-                  </div>
-                ) : (
-                  <>
-                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                      {results.length} {results.length === 1 ? 'word' : 'words'} found
+                <h2 className="torisho-display mt-6 text-3xl font-bold">Ready to explore?</h2>
+                <p className="mt-3 max-w-lg text-lg text-[#665744]">
+                  Start typing a word, reading, romaji, or meaning. Suggestions will update from the backend dictionary.
+                </p>
+              </div>
+            ) : isLoading ? (
+              <SearchSkeleton />
+            ) : results.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[#d7c3ae] bg-white p-10 text-center">
+                <h2 className="torisho-display text-3xl font-bold">No matching words</h2>
+                <p className="mt-3 text-[#665744]">Try a shorter keyword or another reading.</p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#835500]">
+                      Search suggestions
                     </p>
-                    <div className="space-y-3">
-                      {results.map((word) => (
-                        <WordResultCard key={word.id} word={word} keyword={keyword} />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+                    <h2 className="torisho-display mt-1 text-3xl font-bold">
+                      {results.length} result{results.length === 1 ? '' : 's'} for &ldquo;{debouncedQuery}&rdquo;
+                    </h2>
+                  </div>
+                </div>
+                <div className="space-y-5">
+                  {results.map((word) => (
+                    <DictionaryResultCard key={word.id} word={word} keyword={debouncedQuery} />
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
         </div>
-      </main>
+      </div>
+    </LearningShell>
+  );
+}
+
+function DictionaryResultCard({ word, keyword }: { word: WordSearchResult; keyword: string }) {
+  const displayTerm = word.kanji || word.kana;
+  const reading = word.kanji ? word.kana : word.matchedReading;
+
+  return (
+    <Link
+      href={`/dictionary/${word.id}?keyword=${encodeURIComponent(keyword)}`}
+      className="group flex flex-col gap-5 rounded-xl border border-[#d7c3ae] bg-white p-6 text-[#211a12] no-underline shadow-[0_10px_28px_rgba(26,20,16,0.04)] transition-all hover:-translate-y-0.5 hover:border-[#f5a623] md:flex-row md:items-center md:justify-between md:p-8"
+    >
+      <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center md:gap-10">
+        <div className="torisho-jp min-w-36 text-5xl font-bold transition-colors group-hover:text-[#835500]">
+          {highlight(displayTerm, keyword)}
+        </div>
+        <div>
+          <p className="torisho-jp text-xl text-[#665744]">
+            {reading ? highlight(reading, keyword) : null}
+            {word.matchedReading && word.matchedReading !== reading ? ` • ${word.matchedReading}` : null}
+          </p>
+          <p className="mt-2 text-2xl font-bold">{highlight(word.primaryMeaning, keyword)}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {word.isCommon && <Badge tone="warm">Common</Badge>}
+        <Badge tone="cool">Dictionary</Badge>
+        <IconArrowRight className="text-[#857462] transition-transform group-hover:translate-x-1 group-hover:text-[#835500]" />
+      </div>
+    </Link>
+  );
+}
+
+function highlight(text: string, keyword: string) {
+  const trimmedKeyword = keyword.trim();
+
+  if (!trimmedKeyword) {
+    return text;
+  }
+
+  const index = text.toLocaleLowerCase().indexOf(trimmedKeyword.toLocaleLowerCase());
+  if (index < 0) {
+    return text;
+  }
+
+  return (
+    <>
+      {text.slice(0, index)}
+      <mark className="rounded bg-[#ffddb4] px-1 text-[#633f00]">{text.slice(index, index + trimmedKeyword.length)}</mark>
+      {text.slice(index + trimmedKeyword.length)}
+    </>
+  );
+}
+
+function Badge({ children, tone }: { children: React.ReactNode; tone: 'warm' | 'cool' }) {
+  return (
+    <span
+      className={`rounded-full px-4 py-1 text-sm font-bold ${
+        tone === 'warm' ? 'bg-[#f5a623] text-[#291800]' : 'bg-[#e8f7f3] text-[#005047]'
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function DisabledFilter({ label }: { label: string }) {
+  return (
+    <span className="rounded-full border border-[#d7c3ae] bg-[#eee0d2] px-5 py-2 text-sm font-extrabold tracking-[0.08em] text-[#857462] opacity-70">
+      {label}
+    </span>
+  );
+}
+
+function SearchSkeleton() {
+  return (
+    <div className="space-y-5">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-32 animate-pulse rounded-xl border border-[#d7c3ae] bg-white shadow-[0_10px_28px_rgba(26,20,16,0.04)]"
+        />
+      ))}
     </div>
   );
 }
 
-function DictionarySearchPageFallback() {
+function DictionaryPageFallback() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
-      <DashboardHeader />
-
-      <main className="w-full pb-16 pt-8">
-        <div className="flex w-full justify-center px-6 sm:px-8 lg:px-10">
-          <div className="w-full max-w-[1040px]">
-            <div className="flex w-full justify-center">
-              <div className="w-full max-w-2xl">
-                <SearchSkeleton />
-              </div>
-            </div>
-          </div>
+    <LearningShell active="vocabulary">
+      <div className="px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+        <div className="mx-auto max-w-[1240px]">
+          <SearchSkeleton />
         </div>
-      </main>
-    </div>
+      </div>
+    </LearningShell>
   );
 }
 
-export default function DictionarySearchPage() {
+export default function DictionaryPage() {
   return (
-    <Suspense fallback={<DictionarySearchPageFallback />}>
-      <DictionarySearchPageContent />
+    <Suspense fallback={<DictionaryPageFallback />}>
+      <DictionaryPageContent />
     </Suspense>
   );
 }

@@ -1,225 +1,130 @@
 'use client';
 
-import { Container, Title, Text, SimpleGrid, Paper, Badge, Button } from '@mantine/core';
-
-// Inline SVG icons – no emojis
-const ChickenIcon = () => (
-  <svg viewBox="0 0 64 64" fill="none" className="w-14 h-14 drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="32" cy="38" rx="18" ry="16" fill="white" fillOpacity="0.9" />
-    <circle cx="32" cy="20" r="10" fill="white" fillOpacity="0.85" />
-    <path d="M24 16 Q20 10 16 14 Q18 18 24 18Z" fill="white" fillOpacity="0.7" />
-    <circle cx="29" cy="19" r="2" fill="#374151" />
-    <path d="M38 22 L44 20 L42 24Z" fill="white" fillOpacity="0.8" />
-    <path d="M22 52 L18 60 M42 52 L46 60" stroke="white" strokeWidth="3" strokeLinecap="round" />
-  </svg>
-);
-
-const CrownIcon = () => (
-  <svg viewBox="0 0 64 64" fill="none" className="w-14 h-14 drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 44 L14 20 L26 34 L32 14 L38 34 L50 20 L56 44 Z" fill="white" fillOpacity="0.9" />
-    <rect x="8" y="44" width="48" height="8" rx="3" fill="white" fillOpacity="0.75" />
-    <circle cx="32" cy="14" r="3.5" fill="white" fillOpacity="0.6" />
-    <circle cx="14" cy="20" r="3" fill="white" fillOpacity="0.6" />
-    <circle cx="50" cy="20" r="3" fill="white" fillOpacity="0.6" />
-  </svg>
-);
-
-const DiamondIcon = () => (
-  <svg viewBox="0 0 64 64" fill="none" className="w-14 h-14 drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
-    <path d="M32 8 L54 28 L32 56 L10 28 Z" fill="white" fillOpacity="0.9" />
-    <path d="M10 28 L22 18 L42 18 L54 28" stroke="white" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
-    <path d="M22 18 L32 8 L42 18 L32 28 Z" fill="white" fillOpacity="0.55" />
-  </svg>
-);
-
-const StarIcon = () => (
-  <svg viewBox="0 0 64 64" fill="none" className="w-14 h-14 drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
-    <path d="M32 6 L38 24 H56 L42 35 L47 53 L32 42 L17 53 L22 35 L8 24 H26 Z" fill="white" fillOpacity="0.9" />
-    <circle cx="32" cy="32" r="6" fill="white" fillOpacity="0.4" />
-  </svg>
-);
+import Link from 'next/link';
+import {
+  IconCheck as Check,
+  IconCrown as Crown,
+  IconDiamond as Gem,
+  IconSparkles as Sparkles,
+} from '@tabler/icons-react';
 
 const plans = [
   {
     name: 'Monthly',
     price: '$8.99',
     period: '/ month',
-    description: 'Pay monthly and cancel anytime! The best option if you are not fully committed yet.',
-    badge: null,
-    color: 'from-orange-400 to-amber-400',
-    buttonColor: 'orange',
-    Icon: ChickenIcon,
+    description: 'Pay monthly and cancel anytime. A low-commitment way to build a real study habit.',
+    highlight: '',
+    accent: '#f5a623',
+    Icon: Sparkles,
+    features: ['Full JLPT path access', 'Daily quizzes', 'Dictionary saves'],
   },
   {
     name: 'Yearly',
     price: '$6.99',
     period: '/ month',
-    originalPrice: '$83.88 billed yearly',
-    description: 'For serious learners, committed to their language learning goals. Our most popular option.',
-    badge: 'MOST POPULAR',
-    color: 'from-pink-500 to-rose-500',
-    buttonColor: 'pink',
-    Icon: CrownIcon,
+    description: 'For serious learners who want a steady year of lessons, review, and progress tracking.',
+    highlight: 'Most popular',
+    accent: '#006b5f',
+    Icon: Crown,
+    features: ['Everything in Monthly', 'Lower monthly price', 'Best for consistent study'],
   },
   {
     name: 'Lifetime',
     price: '$274.99',
     period: 'one-time',
-    originalPrice: 'Was $349.99',
-    description: 'Are you dedicated to learning Japanese, want to support us and want to be part of our community forever? Then this is the plan for you!*',
-    badge: null,
-    color: 'from-violet-500 to-purple-600',
-    buttonColor: 'grape',
-    Icon: DiamondIcon,
+    description: 'Permanent access for learners who want Torisho as their long-term Japanese base.',
+    highlight: '',
+    accent: '#9b72cf',
+    Icon: Gem,
+    features: ['Lifetime curriculum access', 'Future feature updates', 'Premium add-on option'],
   },
 ];
 
 export default function PricingSection() {
   return (
-    <section id="pricing" className="bg-gradient-to-b from-gray-50/60 to-white py-16! md:py-24!">
-      <Container size="xl" className="mx-auto! max-w-[1200px]! px-6!">
-
-        {/* Section heading */}
-        <div className="text-center mb-16">
-          <Title
-            order={2}
-            className="text-5xl md:text-6xl font-black text-gray-900 mb-4 tracking-tight"
-          >
-            Pricing
-          </Title>
-          <Text size="lg" c="dimmed" className="max-w-2xl mx-auto leading-relaxed">
-            Next to our affordable subscriptions, we also offer a one-time payment lifetime plan
-            and a special bundle deal for the premium experience!
-          </Text>
+    <section id="pricing" className="border-y border-[#d7c3ae] bg-[#fff8f4] py-12 sm:py-16">
+      <div className="torisho-shell">
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <p className="torisho-eyebrow mb-3">Pricing</p>
+          <h2 className="torisho-section-title">Pick the Pace That Fits</h2>
+          <p className="torisho-section-copy mx-auto mt-3 max-w-2xl">
+            Affordable subscriptions for regular study, plus a lifetime option for learners who
+            want permanent access.
+          </p>
         </div>
 
-        {/* Main 3-card grid */}
-        <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" className="mb-10 grid! md:grid-cols-3! gap-6!">
-          {plans.map((plan, index) => (
-            <Paper
-              key={index}
-              radius="xl"
-              className="relative overflow-hidden h-full! flex! flex-col! hover:scale-105! transition-all! duration-200 hover:shadow-2xl shadow-md ring-1 ring-gray-100 cursor-pointer"
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {plans.map(({ Icon, ...plan }) => (
+            <article
+              key={plan.name}
+              className="relative flex min-h-[455px] flex-col overflow-hidden rounded-lg border border-[#d7c3ae] bg-white shadow-[0_6px_18px_rgba(26,20,16,0.06)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(54,37,20,0.12)]"
             >
-              {/* Gradient header with icon */}
-              <div className={`h-44 bg-gradient-to-br ${plan.color} flex items-center justify-center relative overflow-hidden`}>
-                <div className="absolute inset-0 bg-black/5" />
-                {/* "Most Popular" badge in header */}
-                {plan.badge && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <Badge
-                      size="sm"
-                      radius="md"
-                      className="bg-white/30 text-white font-bold uppercase tracking-widest border-0 shadow-sm px-3 py-1 backdrop-blur-sm"
-                    >
-                      {plan.badge}
-                    </Badge>
-                  </div>
-                )}
-                <div className="z-10 transform hover:scale-110 transition-transform duration-300">
-                  <plan.Icon />
-                </div>
+              {plan.highlight && (
+                <span className="absolute right-4 top-4 z-10 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#006b5f] shadow-sm">
+                  {plan.highlight}
+                </span>
+              )}
+              <div className="flex h-28 items-center justify-center" style={{ backgroundColor: plan.accent }}>
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-sm">
+                  <Icon size={32} color={plan.accent} stroke={1.8} />
+                </span>
               </div>
 
-              {/* Card body */}
-              <div className="px-7 pt-7 pb-8 flex! flex-col! justify-between! flex-1 bg-white gap-4">
-                <Title order={3} className="text-2xl font-black text-gray-900">
+              <div className="flex flex-1 flex-col p-6">
+                <h3 className="torisho-display text-2xl font-semibold text-[#211a12]">
                   {plan.name}
-                </Title>
-
-                {/* Price block — fixed min-height so cards align */}
-                <div className="min-h-[72px] flex flex-col justify-end">
-                  {plan.originalPrice && (
-                    <Text td="line-through" c="dimmed" size="sm" fw={500} className="leading-snug">
-                      {plan.originalPrice}
-                    </Text>
-                  )}
-                  <div className="flex items-baseline gap-1">
-                    <Text className="text-4xl font-black text-slate-800 tracking-tight leading-none">
-                      {plan.price}
-                    </Text>
-                    <Text c="dimmed" size="sm" fw={500}>
-                      {plan.period}
-                    </Text>
-                  </div>
+                </h3>
+                <div className="mt-5 flex items-end gap-2">
+                  <span className="text-4xl font-extrabold leading-none text-[#211a12]">{plan.price}</span>
+                  <span className="pb-1 text-sm font-semibold text-[#665744]">{plan.period}</span>
                 </div>
+                <p className="mt-4 min-h-[66px] text-sm leading-6 text-[#665744]">{plan.description}</p>
 
-                <Text size="sm" className="text-gray-500 leading-relaxed flex-1">
-                  {plan.description}
-                </Text>
+                <ul className="mt-4 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3 text-sm text-[#3d2a17]">
+                      <Check className="mt-0.5 flex-shrink-0 text-[#006b5f]" size={17} stroke={2.2} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
 
-                <Button
-                  fullWidth
-                  size="md"
-                  radius="xl"
-                  color={plan.buttonColor}
-                  className="mt-auto cursor-pointer shadow-sm hover:shadow-md transition-all duration-150 hover:scale-[1.02] font-semibold"
+                <Link
+                  href="/register"
+                  className="mt-auto inline-flex min-h-11 items-center justify-center rounded-full bg-[#f5a623] px-6 py-3 text-sm font-bold text-[#291800] transition-colors hover:bg-[#ffb955]"
                 >
-                  Start Your 14-Day Trial
-                </Button>
+                  Start Your Trial
+                </Link>
               </div>
-            </Paper>
+            </article>
           ))}
-        </SimpleGrid>
+        </div>
 
-        {/* Premium Add-on Card — full width horizontal */}
-        <Paper
-          radius="xl"
-          shadow="sm"
-          className="overflow-hidden hover:shadow-xl transition-all duration-200 ring-1 ring-gray-100 bg-white cursor-pointer"
-        >
-          <div className="flex flex-col md:flex-row items-stretch">
-            {/* Left gradient panel */}
-            <div className="md:w-[38%] bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center py-12 md:py-0 relative overflow-hidden min-h-[160px]">
-              <div className="absolute inset-0 bg-black/5" />
-              <div className="z-10 transform hover:rotate-6 transition-transform duration-500">
-                <StarIcon />
+        <div className="mt-7 rounded-lg border border-[#d7c3ae] bg-white p-5 shadow-[0_6px_18px_rgba(26,20,16,0.05)] sm:p-6">
+          <div className="grid grid-cols-1 items-center gap-5 lg:grid-cols-[0.8fr_1fr_auto]">
+            <div className="flex items-center gap-4">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#c4e7ff] text-[#00658a]">
+                <Sparkles size={30} />
+              </span>
+              <div>
+                <h3 className="torisho-display text-2xl font-semibold text-[#211a12]">
+                  Torisho Premium Add-on
+                </h3>
+                <p className="mt-1 text-sm text-[#665744]">Only available with Torisho Lifetime.</p>
               </div>
             </div>
-
-            {/* Right content */}
-            <div className="flex-1 px-8 py-8 md:px-10 md:py-9 text-center md:text-left flex flex-col justify-center gap-4">
-              <Title order={3} className="text-2xl md:text-3xl font-black text-gray-900">
-                Torisho Premium Add-on
-              </Title>
-
-              <div className="flex flex-col md:flex-row items-center md:items-baseline gap-2">
-                <Text td="line-through" c="dimmed" size="lg" fw={600}>
-                  $199.99
-                </Text>
-                <Text className="text-4xl font-black text-blue-500 tracking-tight leading-none">
-                  $49.99
-                </Text>
-              </div>
-
-              <Text size="md" className="text-gray-500 leading-relaxed">
-                Only $49.99 to get Torisho Premium features as an add-on when you get Torisho Lifetime!
-              </Text>
-
-              <Badge
-                color="blue"
-                variant="light"
-                size="md"
-                radius="md"
-                className="self-center md:self-start font-bold uppercase tracking-widest"
-              >
-                Only Available With Torisho Lifetime
-              </Badge>
-
-              <Button
-                fullWidth
-                size="md"
-                radius="xl"
-                color="cyan"
-                className="mt-1 cursor-pointer shadow-sm hover:shadow-md transition-all duration-150 hover:scale-[1.01] font-semibold"
-              >
-                Start Your 14-Day Trial
-              </Button>
+            <p className="text-sm leading-7 text-[#665744]">
+              Add extra premium features to the lifetime plan when you are ready to go deeper with
+              your study setup.
+            </p>
+            <div className="text-left lg:text-right">
+              <p className="text-sm font-semibold text-[#857462] line-through">$199.99</p>
+              <p className="text-3xl font-extrabold text-[#00658a]">$49.99</p>
             </div>
           </div>
-        </Paper>
-
-      </Container>
+        </div>
+      </div>
     </section>
   );
 }
