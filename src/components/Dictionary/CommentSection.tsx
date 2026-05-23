@@ -114,11 +114,6 @@ function ComposeBox({
 		[content],
 	);
 
-	useEffect(() => {
-		setContent(normalizedInitialContent);
-		setIsPreviewVisible(false);
-	}, [normalizedInitialContent]);
-
 	const applyToolbar = useCallback(
 		(action: MarkdownToolbarAction) => {
 			const textarea = textareaRef.current;

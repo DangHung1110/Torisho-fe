@@ -1,42 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;500;700&family=Poppins:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff8f4;
+  --foreground: #211a12;
   --font-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  /* Auth / sample-style (MaruMori-like) */
-  --auth-primary: #6eb8ea;
-  --auth-primary-hover: #5aa8dc;
-  --auth-input-bg: #f3f4f6;
-  --auth-input-focus: rgba(110, 184, 234, 0.35);
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Lora', Georgia, serif;
+  --font-japanese: 'Noto Serif JP', Georgia, serif;
+  --torisho-surface: #fff8f4;
+  --torisho-surface-low: #fff1e4;
+  --torisho-surface-card: #fffdfb;
+  --torisho-border: #d7c3ae;
+  --torisho-primary: #835500;
+  --torisho-primary-soft: #f5a623;
+  --torisho-text: #211a12;
+  --torisho-muted: #665744;
+  --auth-primary: #f5a623;
+  --auth-primary-hover: #e69616;
+  --auth-input-bg: #fff8f4;
+  --auth-input-focus: rgba(245, 166, 35, 0.3);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #fff8f4;
+    --foreground: #211a12;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -44,7 +52,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ─── Custom scrollbar ─────────────────────────────── */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -62,7 +70,7 @@ html {
   background: #9ca3af;
 }
 
-/* ─── Typing cursor animation ─────────────────────── */
+/* Typing cursor animation */
 @keyframes blink {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
@@ -72,7 +80,7 @@ html {
   animation: blink 1s infinite;
 }
 
-/* ─── Fade-in-up entrance animation ──────────────── */
+/* Fade-in-up entrance animation */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -96,7 +104,7 @@ html {
   animation: fadeInUp 0.7s 0.3s ease both;
 }
 
-/* ─── Gradient text utility ───────────────────────── */
+/* Gradient text utility */
 .gradient-text-orange {
   background: linear-gradient(135deg, #f97316, #ef4444);
   -webkit-background-clip: text;
@@ -111,7 +119,7 @@ html {
   background-clip: text;
 }
 
-/* ─── Shimmer / active-tile pulse ───────────────── */
+/* Shimmer / active-tile pulse */
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
@@ -132,10 +140,96 @@ html {
   z-index: -1;
 }
 
-/* ─── Glass card utility ─────────────────────────── */
+/* Glass card utility */
 .glass-card {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.torisho-display {
+  font-family: var(--font-display);
+}
+
+.torisho-jp {
+  font-family: var(--font-japanese);
+}
+
+.torisho-shell {
+  width: min(100% - 96px, 1200px);
+  margin-inline: auto;
+}
+
+.torisho-section-title {
+  font-family: var(--font-display);
+  color: #7a4300;
+  font-size: clamp(2rem, 2.4vw, 2.55rem);
+  line-height: 1.16;
+  font-weight: 700;
+}
+
+.torisho-eyebrow {
+  color: #835500;
+  font-size: 0.72rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.torisho-section-copy {
+  color: #665744;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.torisho-auth-grid {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.torisho-auth-form {
+  width: min(100% - 96px, 560px);
+  margin-inline: auto;
+}
+
+.torisho-auth-input {
+  height: 54px;
+  width: 100%;
+  border: 1px solid #d7c3ae;
+  background: #fff8f4;
+  color: #211a12;
+  padding: 0 20px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.torisho-auth-input::placeholder {
+  color: #857462;
+}
+
+.torisho-auth-input:focus {
+  border-color: #f5a623;
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.22);
+}
+
+.torisho-auth-input.pr-14 {
+  padding-right: 3.5rem;
+}
+
+@media (max-width: 1023px) {
+  .torisho-shell {
+    width: min(100% - 40px, 1200px);
+  }
+
+  .torisho-auth-grid {
+    display: block;
+  }
+
+  .torisho-auth-form {
+    width: min(100% - 40px, 560px);
+  }
 }

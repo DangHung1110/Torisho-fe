@@ -32,4 +32,32 @@ export class LearningService {
       { requiresAuth: false }
     );
   }
+
+  static async startLesson(slug: string): Promise<{ message: string }> {
+    return api.post<{ message: string }>(`/learning/lessons/${slug}/start`);
+  }
+
+  static async updateLessonProgress(
+    slug: string,
+    data: LessonHeartbeatRequest
+  ): Promise<{ message: string }> {
+    return api.post<{ message: string }>(`/learning/lessons/${slug}/progress`, data);
+  }
+
+  static async completeLesson(
+    slug: string,
+    data: LessonHeartbeatRequest
+  ): Promise<{ message: string }> {
+    return api.post<{ message: string }>(`/learning/lessons/${slug}/complete`, data);
+  }
+}
+
+export interface LessonHeartbeatRequest {
+  lessonProgressPercent: number;
+  chapterProgressPercent?: number;
+  levelProgressPercent?: number;
+  vocabularyProgress?: number;
+  grammarProgress?: number;
+  readingProgress?: number;
+  section?: string;
 }

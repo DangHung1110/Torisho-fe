@@ -10,9 +10,9 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect authenticated users to adventure
+    // Redirect authenticated users to the learning dashboard
     if (!loading && isAuthenticated) {
-      router.replace('/adventure');
+      router.replace('/dashboard');
     }
   }, [isAuthenticated, loading, router]);
 
