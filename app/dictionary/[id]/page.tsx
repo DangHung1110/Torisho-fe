@@ -12,6 +12,7 @@ import {
 import LearningShell from '@/src/components/LearningShell';
 import KanjiModal from '@/src/components/Dictionary/KanjiModal';
 import { useAuth } from '@/src/libs/useAuth';
+import CommentSection from '@/src/components/Dictionary/CommentSection';
 import { dictionaryService } from '@/src/services/dictionary.service';
 import { FlashcardService } from '@/src/services/flashcard.service';
 import { POS_MAP } from '@/src/constants/pos_map';
@@ -19,7 +20,7 @@ import { WordDetail, WordExample, WordSense } from '@/src/types/dictionary';
 import { FlashcardDeck } from '@/src/types/flashcard';
 
 function WordDetailPageContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const router = useRouter();
   const params = useParams<{ id: string | string[] }>();
   const searchParams = useSearchParams();
@@ -82,6 +83,15 @@ function WordDetailPageContent() {
 
   const primaryMeaning = word ? getPrimaryMeaning(word.senses) : '';
   const posLabel = word ? getPrimaryPosLabel(word.senses) : null;
+  const currentUser = useMemo(() => {
+    if (!isAuthenticated || !user) return null;
+
+    return {
+      id: user.id,
+      fullName: user.username ?? user.email ?? 'User',
+      avatarUrl: user.avatarUrl ?? null,
+    };
+  }, [isAuthenticated, user]);
 
   return (
     <LearningShell active="vocabulary">
@@ -173,6 +183,17 @@ function WordDetailPageContent() {
                     No definition data is available for this entry.
                   </div>
                 )}
+
+                <div className="rounded-xl border border-[#d7c3ae] bg-white p-8 shadow-[0_12px_32px_rgba(26,20,16,0.05)]">
+                  <CommentSection
+                    wordId={wordId ?? ''}
+                    currentUser={currentUser}
+                    fetchComments={dictionaryService.getComments}
+                    postComment={dictionaryService.postComment}
+                    updateComment={dictionaryService.updateComment}
+                    deleteComment={dictionaryService.deleteComment}
+                  />
+                </div>
               </section>
             </div>
           ) : null}

@@ -14,3 +14,9 @@ export interface KanjiDetail {
   meanings: string[];
   relatedWords: KanjiRelatedWord[];
 }
+
+export interface RecognizeKanjiRequest {
+  strokes: number[][];
+  width: number;
+  height: number;
+}

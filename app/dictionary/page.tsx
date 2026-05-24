@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -9,6 +9,7 @@ import {
   IconSearch,
 } from '@tabler/icons-react';
 import LearningShell from '@/src/components/LearningShell';
+import KanjiHandwritingPanel from '@/src/components/Dictionary/KanjiHandwritingPanel';
 import { dictionaryService } from '@/src/services/dictionary.service';
 import { WordSearchResult } from '@/src/types/dictionary';
 
@@ -16,12 +17,14 @@ function DictionaryPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const inputRef = useRef<HTMLInputElement>(null);
   const urlKeyword = useMemo(() => searchParams.get('keyword')?.trim() ?? '', [searchParams]);
   const [query, setQuery] = useState(urlKeyword);
   const [debouncedQuery, setDebouncedQuery] = useState(urlKeyword);
   const [results, setResults] = useState<WordSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isHandwritingOpen, setIsHandwritingOpen] = useState(true);
 
   useEffect(() => {
     setQuery(urlKeyword);
@@ -84,6 +87,14 @@ function DictionaryPageContent() {
     };
   }, [debouncedQuery]);
 
+  const handleCandidateSelect = (character: string) => {
+    const trimmed = character.trim();
+    if (!trimmed) return;
+    setQuery((prev) => `${prev}${trimmed}`);
+    setDebouncedQuery((prev) => `${prev}${trimmed}`);
+    inputRef.current?.focus();
+  };
+
   return (
     <LearningShell active="vocabulary">
       <div className="px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
@@ -101,6 +112,7 @@ function DictionaryPageContent() {
                 size={26}
               />
               <input
+                ref={inputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="h-20 w-full rounded-full border border-[#d7c3ae] bg-[#fff8f4] pl-16 pr-6 text-xl text-[#211a12] shadow-[0_10px_28px_rgba(26,20,16,0.04)] outline-none transition-all placeholder:text-[#857462] focus:border-[#f5a623] focus:ring-4 focus:ring-[#f5a623]/20"
@@ -108,13 +120,28 @@ function DictionaryPageContent() {
                 autoFocus
               />
             </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <IconAdjustmentsHorizontal size={18} className="text-[#857462]" />
-              <DisabledFilter label="Common words" />
-              <DisabledFilter label="JLPT level (N5-N1)" />
-              <DisabledFilter label="Part of speech" />
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsHandwritingOpen((prev) => !prev)}
+                className="rounded-full border border-[#d7c3ae] bg-white px-5 py-2 text-sm font-extrabold tracking-[0.08em] text-[#835500] transition hover:border-[#f5a623]"
+              >
+                {isHandwritingOpen ? 'Hide handwriting' : 'Handwriting OCR'}
+              </button>
+              <span className="text-sm text-[#665744]">
+                Draw a kanji and insert it into search.
+              </span>
             </div>
           </header>
+
+          {isHandwritingOpen && (
+            <section className="mt-6">
+              <KanjiHandwritingPanel
+                onCandidateSelect={handleCandidateSelect}
+                onClose={() => setIsHandwritingOpen(false)}
+              />
+            </section>
+          )}
 
           {errorMessage && (
             <div className="mt-8 rounded-xl border border-[#ffdad6] bg-[#fff1ef] px-5 py-4 text-[#93000a]">
@@ -225,14 +252,6 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: 'warm' | '
       }`}
     >
       {children}
-    </span>
-  );
-}
-
-function DisabledFilter({ label }: { label: string }) {
-  return (
-    <span className="rounded-full border border-[#d7c3ae] bg-[#eee0d2] px-5 py-2 text-sm font-extrabold tracking-[0.08em] text-[#857462] opacity-70">
-      {label}
     </span>
   );
 }
