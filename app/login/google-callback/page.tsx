@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Alert, Button, Loader, Paper, Stack, Text, Title } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
+import { getPostLoginPath } from '@/src/libs/rbac';
 import { AuthService } from '@/src/services/auth.service';
 
 type CallbackStatus = 'loading' | 'error';
@@ -73,12 +74,12 @@ export default function GoogleCallbackPage() {
       }
 
       try {
-        await AuthService.externalLogin({
+        const result = await AuthService.externalLogin({
           provider: 'Google',
           providerToken: idToken,
         });
 
-        router.replace('/dashboard');
+        router.replace(getPostLoginPath(result.user));
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : 'Unable to sign in with Google right now.';

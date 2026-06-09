@@ -11,6 +11,7 @@ import {
   IconEyeOff,
   IconInfoCircle,
 } from '@tabler/icons-react';
+import { getPostLoginPath } from '../libs/rbac';
 import { AuthService } from '../services/auth.service';
 
 const loginArtwork =
@@ -33,8 +34,8 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      await AuthService.login({ username, password });
-      router.push('/dashboard');
+      const result = await AuthService.login({ username, password });
+      router.push(getPostLoginPath(result.user));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An error occurred during login';
       setError(message);

@@ -15,7 +15,11 @@ export interface User {
     id: string;
     username: string;
     email: string;
+    fullName?: string;
     avatarUrl?: string;
+    status?: string;
+    roles?: string[];
+    permissions?: string[];
     role?: string;
 }
 

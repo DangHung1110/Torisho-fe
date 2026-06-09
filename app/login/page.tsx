@@ -4,17 +4,17 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginForm } from '@/src/components/LoginForm';
 import { useAuth } from '@/src/libs/useAuth';
+import { getPostLoginPath } from '@/src/libs/rbac';
 
 export default function LoginPage() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect authenticated users to the learning dashboard
     if (!loading && isAuthenticated) {
-      router.replace('/dashboard');
+      router.replace(getPostLoginPath(user));
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, router, user]);
 
   if (loading) {
     return null;

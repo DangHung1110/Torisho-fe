@@ -34,12 +34,18 @@ export const AuthStorage = {
 
   setUser(user: User): void {
     if (typeof window === 'undefined') return;
+    const roles = user.roles ?? (user.role ? [user.role] : []);
+
     // Filter to only store public user data
     const publicUserData: User = {
       id: user.id,
       username: user.username,
       email: user.email,
+      fullName: user.fullName,
       avatarUrl: user.avatarUrl,
+      status: user.status,
+      roles,
+      permissions: user.permissions ?? [],
       role: user.role,
     };
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(publicUserData));

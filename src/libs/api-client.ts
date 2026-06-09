@@ -41,6 +41,10 @@ export async function apiRequest<T>(
     throw new Error('Unauthorized - Please login again');
   }
 
+  if (response.status === 403) {
+    throw new Error('Forbidden - You do not have permission to perform this action');
+  }
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || `Request failed with status ${response.status}`);
