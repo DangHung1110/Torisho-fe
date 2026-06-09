@@ -10,17 +10,17 @@ import PricingSection from '../src/components/PricingSection';
 import RoadmapSection from '../src/components/RoadmapSection';
 import Footer from '../src/components/Footer';
 import { useAuth } from '../src/libs/useAuth';
+import { getPostLoginPath } from '../src/libs/rbac';
 
 export default function Home() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect authenticated users to the learning dashboard
     if (!loading && isAuthenticated) {
-      router.replace('/dashboard');
+      router.replace(getPostLoginPath(user));
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, router, user]);
 
   // Show loading or home page for non-authenticated users
   if (loading) {
