@@ -68,6 +68,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
   const [remoteCameraOn, setRemoteCameraOn] = useState(true);
   const [remoteUserName, setRemoteUserName] = useState('Partner');
   const [hasRemoteStream, setHasRemoteStream] = useState(false);
+  const [hasPeerConnection, setHasPeerConnection] = useState(false);
 
   const connectionRef = useRef<signalR.HubConnection | null>(null);
   const initializedRef = useRef(false);
@@ -88,9 +89,19 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     try {
       const roomData = await RoomService.getRoom(roomId);
       setRoom(roomData);
+      return roomData;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load room');
+      return null;
     }
+  };
+
+  const roomCanNegotiate = (roomData: Room | null) => {
+    return Boolean(
+      roomData &&
+        ![RoomStatus.Completed, RoomStatus.Cancelled].includes(roomData.status) &&
+        (roomData.status === RoomStatus.Active || roomData.participantCount >= 2),
+    );
   };
 
   const setupLocalMedia = async () => {
@@ -146,6 +157,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
 
     pendingCandidatesRef.current = [];
     remoteConnectionIdRef.current = null;
+    setHasPeerConnection(false);
     setHasRemoteStream(false);
     setRemoteUserName('Partner');
     setRemoteMicOn(true);
@@ -245,6 +257,11 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     }
   };
 
+  const createOfferWhenReady = async (roomData: Room | null) => {
+    if (!remoteConnectionIdRef.current || !roomCanNegotiate(roomData)) return;
+    await createAndSendOffer();
+  };
+
   const syncMediaState = async (nextMicOn: boolean, nextCameraOn: boolean) => {
     if (!connectionRef.current) return;
     try {
@@ -274,7 +291,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
         ...prev,
         { userId: 'system', username: 'System', message: `${data.username} joined the room`, sentAt: data.joinedAt },
       ]);
-      void loadRoomData();
+      void loadRoomData().then(createOfferWhenReady);
     });
 
     newConnection.on('UserLeft', (data: UserLeft) => {
@@ -311,18 +328,18 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
           sentAt: new Date().toISOString(),
         },
       ]);
-      void loadRoomData();
+      void loadRoomData().then(createOfferWhenReady);
     });
 
     newConnection.on('PeerJoined', async (data: PeerJoinedEvent) => {
       remoteConnectionIdRef.current = data.connectionId;
+      setHasPeerConnection(true);
       setRemoteUserName(data.username);
       setPartnerLeft(false);
       ensurePeer();
       await syncMediaState(isMicOn, isCameraOn);
-      if (room?.status === RoomStatus.Active) {
-        await createAndSendOffer();
-      }
+      const latestRoom = await loadRoomData();
+      await createOfferWhenReady(latestRoom);
     });
 
     newConnection.on('PeerDisconnected', (data: PeerDisconnectedEvent) => {
@@ -332,6 +349,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
 
     newConnection.on('ReceiveOffer', async (data: SignalOfferEvent) => {
       remoteConnectionIdRef.current = data.fromConnectionId;
+      setHasPeerConnection(true);
       setRemoteUserName(data.fromUsername);
 
       const pc = ensurePeer();
@@ -554,8 +572,9 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
   }, [messages]);
 
   const roomEnded = room?.status === RoomStatus.Completed || room?.status === RoomStatus.Cancelled || partnerLeft;
-  const isWaiting = room?.status === RoomStatus.Waiting && !roomEnded;
-  const canStart = room?.status === RoomStatus.Waiting && room.participantCount >= 2;
+  const hasPartner = hasPeerConnection || (room?.participantCount ?? 0) >= 2;
+  const isWaiting = room?.status === RoomStatus.Waiting && !hasPartner && !roomEnded;
+  const canStart = room?.status === RoomStatus.Waiting && hasPartner;
   const formattedLevel = room?.targetLevel ?? 'N/A';
   const roomCode = room?.id.slice(0, 8).toUpperCase() ?? '...';
 
