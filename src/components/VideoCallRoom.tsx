@@ -241,6 +241,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
     const pc = ensurePeer();
 
     if (makingOfferRef.current) return;
+    if (pc.signalingState !== 'stable') return;
     makingOfferRef.current = true;
 
     try {
