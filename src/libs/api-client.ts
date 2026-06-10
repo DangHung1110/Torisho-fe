@@ -1,6 +1,10 @@
 import { AuthStorage } from './auth-storage';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:5118/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:5118/api';
+
+export function getApiOrigin() {
+  return new URL(API_BASE_URL).origin;
+}
 
 export interface ApiRequestOptions extends RequestInit {
   requiresAuth?: boolean;

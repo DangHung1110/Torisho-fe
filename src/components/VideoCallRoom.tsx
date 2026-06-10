@@ -38,6 +38,7 @@ import {
 } from '@/src/types/room';
 import { RoomService } from '@/src/services/room.service';
 import { AuthStorage } from '@/src/libs/auth-storage';
+import { API_BASE_URL, getApiOrigin } from '@/src/libs/api-client';
 
 interface VideoCallRoomProps {
   roomId: string;
@@ -253,7 +254,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
 
   const connectToHub = async () => {
     const token = AuthStorage.getAccessToken();
-    const baseUrl = (process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:5118/api').replace('/api', '');
+    const baseUrl = getApiOrigin();
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(`${baseUrl}/hubs/room`, {
@@ -537,8 +538,7 @@ export default function VideoCallRoom({ roomId }: VideoCallRoomProps) {
       const token = AuthStorage.getAccessToken();
       if (!token) return;
 
-      const apiBase = process.env.NEXT_PUBLIC_BE_URL || 'http://localhost:5118/api';
-      fetch(`${apiBase}/room/${roomId}/leave`, {
+      fetch(`${API_BASE_URL}/room/${roomId}/leave`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         keepalive: true,
