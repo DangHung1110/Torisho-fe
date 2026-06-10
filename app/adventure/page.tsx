@@ -17,7 +17,6 @@ import { useAuth } from '@/src/libs/useAuth';
 import { LearningService } from '@/src/services/learning.service';
 import {
   ChapterLessonsResponse,
-  ChapterListItem,
   LevelChaptersResponse,
   LessonListItem,
 } from '@/src/types/learning';
@@ -79,37 +78,6 @@ const levelMeta: Record<JLPTLevel, LevelTone> = {
     chapters: '22 Chapters • 88 Lessons',
   },
 };
-
-const fallbackChapters: ChapterListItem[] = [
-  { id: 'n5-1', title: 'Greetings & Introductions', order: 1, lessonCount: 3 },
-  { id: 'n5-2', title: 'Daily Routines', order: 2, lessonCount: 3 },
-  { id: 'n5-3', title: 'Weekend Plans', order: 3, lessonCount: 3 },
-];
-
-const fallbackLessons: LessonListItem[] = [
-  {
-    id: 'fallback-1',
-    slug: 'lesson-1-time-action',
-    title: 'Time & Action',
-    order: 1,
-    sourceLevel: JLPTLevel.N5,
-    hasQuiz: true,
-    vocabularyCount: 12,
-    grammarCount: 2,
-    readingCount: 1,
-  },
-  {
-    id: 'fallback-2',
-    slug: 'lesson-2-describing-places',
-    title: 'Describing Places',
-    order: 2,
-    sourceLevel: JLPTLevel.N5,
-    hasQuiz: true,
-    vocabularyCount: 14,
-    grammarCount: 1,
-    readingCount: 1,
-  },
-];
 
 const createChapterKey = (level: JLPTLevel, chapterOrder: number) =>
   `${level}-${chapterOrder}`;
@@ -316,7 +284,7 @@ function LevelCard({
   onOpenLesson,
 }: LevelCardProps) {
   const meta = levelMeta[level];
-  const chapters = levelData?.chapters.length ? levelData.chapters : level === JLPTLevel.N5 ? fallbackChapters : [];
+  const chapters = levelData?.chapters ?? [];
   const progress = level === JLPTLevel.N5 ? 45 : 0;
   const locked = [JLPTLevel.N3, JLPTLevel.N2, JLPTLevel.N1].includes(level);
 
@@ -374,8 +342,7 @@ function LevelCard({
               const chapterLoading = loadingChapterKey === chapterKey;
               const chapterError = chapterErrors[chapterKey];
               const lessonData = lessonsByChapterKey[chapterKey];
-              const lessons =
-                lessonData?.lessons.length ? lessonData.lessons : level === JLPTLevel.N5 && chapter.order === 2 ? fallbackLessons : [];
+              const lessons = lessonData?.lessons ?? [];
 
               return (
                 <div key={chapter.id} className="border-b border-[#eee0d2] last:border-b-0">

@@ -78,6 +78,12 @@ const previewLesson: LessonDetailResponse = {
   ],
 };
 
+const legacyLessonSlugRedirects: Record<string, string> = {
+  'lesson-1-time-action': 'n5-ch01-l01',
+  'lesson-2-describing-places': 'n5-ch01-l02',
+  'lesson-3-basic-particles': 'n5-ch01-l03',
+};
+
 export default function LessonDetailPage() {
   const { isAuthenticated, loading } = useAuth();
   const params = useParams();
@@ -99,6 +105,12 @@ export default function LessonDetailPage() {
 
   useEffect(() => {
     if (!slug) {
+      return;
+    }
+
+    const redirectSlug = legacyLessonSlugRedirects[slug];
+    if (redirectSlug) {
+      router.replace(`/adventure/lessons/${redirectSlug}`);
       return;
     }
 
@@ -133,7 +145,7 @@ export default function LessonDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [router, slug]);
 
   useEffect(() => {
     const updateSectionFromHash = () => {
