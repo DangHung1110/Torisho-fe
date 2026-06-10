@@ -7,8 +7,10 @@ import {
   IconArrowRight,
   IconCamera,
   IconInfoCircle,
+  IconLink,
   IconLoader2,
   IconMicrophone,
+  IconPlus,
   IconSearch,
   IconUsers,
   IconX,
@@ -27,6 +29,7 @@ const levelDescriptions: Record<JLPTLevel, string> = {
 };
 
 type LobbyState = 'idle' | 'permissions' | 'searching' | 'matched';
+type MatchMode = 'random' | 'private';
 
 export default function SpeakingPage() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -35,6 +38,8 @@ export default function SpeakingPage() {
   const previewStreamRef = useRef<MediaStream | null>(null);
 
   const [selectedLevel, setSelectedLevel] = useState<JLPTLevel>(JLPTLevel.N5);
+  const [matchMode, setMatchMode] = useState<MatchMode>('random');
+  const [inviteCodeInput, setInviteCodeInput] = useState('');
   const [lobbyState, setLobbyState] = useState<LobbyState>('idle');
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [isCheckingRoom, setIsCheckingRoom] = useState(true);
@@ -157,6 +162,53 @@ export default function SpeakingPage() {
     }
   };
 
+  const createPrivateRoom = async () => {
+    setIsJoining(true);
+    setJoinError(null);
+
+    try {
+      const result = await RoomService.createPrivateRoom(selectedLevel);
+      if (!result.room) {
+        throw new Error(result.message || 'Unable to create private room.');
+      }
+
+      stopPreview();
+      setCurrentRoom(result.room);
+      setLobbyState(result.room.participantCount >= 2 || result.room.status === RoomStatus.Active ? 'matched' : 'searching');
+    } catch (error) {
+      setJoinError(error instanceof Error ? error.message : 'Unable to create private room.');
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const joinPrivateRoom = async () => {
+    const inviteCode = inviteCodeInput.trim();
+    if (!inviteCode) {
+      setJoinError('Enter an invite code first.');
+      return;
+    }
+
+    setIsJoining(true);
+    setJoinError(null);
+
+    try {
+      const result = await RoomService.joinPrivateRoom(inviteCode);
+      if (!result.room) {
+        throw new Error(result.message || 'Unable to join private room.');
+      }
+
+      stopPreview();
+      setCurrentRoom(result.room);
+      setSelectedLevel(result.room.targetLevel ?? selectedLevel);
+      setLobbyState(result.room.participantCount >= 2 || result.room.status === RoomStatus.Active ? 'matched' : 'searching');
+    } catch (error) {
+      setJoinError(error instanceof Error ? error.message : 'Unable to join private room.');
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
   const cancelSearch = async () => {
     const roomId = currentRoom?.id;
     setCurrentRoom(null);
@@ -214,9 +266,21 @@ export default function SpeakingPage() {
 
           {lobbyState === 'idle' && (
             <IdleLobby
+              matchMode={matchMode}
+              inviteCodeInput={inviteCodeInput}
+              isJoining={isJoining}
               selectedLevel={selectedLevel}
+              onSelectMode={setMatchMode}
               onSelectLevel={setSelectedLevel}
-              onPrepare={() => setLobbyState('permissions')}
+              onInviteCodeInput={setInviteCodeInput}
+              onPrepare={() => {
+                if (matchMode === 'random') {
+                  setLobbyState('permissions');
+                  return;
+                }
+                void createPrivateRoom();
+              }}
+              onJoinPrivate={joinPrivateRoom}
             />
           )}
 
@@ -262,18 +326,64 @@ export default function SpeakingPage() {
 }
 
 function IdleLobby({
+  matchMode,
+  inviteCodeInput,
+  isJoining,
   selectedLevel,
+  onSelectMode,
   onSelectLevel,
+  onInviteCodeInput,
   onPrepare,
+  onJoinPrivate,
 }: {
+  matchMode: MatchMode;
+  inviteCodeInput: string;
+  isJoining: boolean;
   selectedLevel: JLPTLevel;
+  onSelectMode: (mode: MatchMode) => void;
   onSelectLevel: (level: JLPTLevel) => void;
+  onInviteCodeInput: (value: string) => void;
   onPrepare: () => void;
+  onJoinPrivate: () => void;
 }) {
   return (
     <section className="grid gap-8 py-10 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div>
         <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.16em] text-[#3d2a17]">
+          Practice Mode
+        </p>
+        <div className="grid max-w-2xl gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => onSelectMode('random')}
+            className={`rounded-xl border p-5 text-left transition ${
+              matchMode === 'random'
+                ? 'border-[#f5a623] bg-[#fff1e4] shadow-sm'
+                : 'border-[#d7c3ae] bg-white hover:bg-[#fff8f4]'
+            }`}
+          >
+            <span className="flex items-center gap-2 text-lg font-bold text-[#211a12]">
+              <IconSearch size={22} /> Random Match
+            </span>
+            <span className="mt-2 block text-sm text-[#665744]">Find any waiting learner at your JLPT level.</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectMode('private')}
+            className={`rounded-xl border p-5 text-left transition ${
+              matchMode === 'private'
+                ? 'border-[#f5a623] bg-[#fff1e4] shadow-sm'
+                : 'border-[#d7c3ae] bg-white hover:bg-[#fff8f4]'
+            }`}
+          >
+            <span className="flex items-center gap-2 text-lg font-bold text-[#211a12]">
+              <IconLink size={22} /> Private Room
+            </span>
+            <span className="mt-2 block text-sm text-[#665744]">Create an invite code or join a friend&apos;s room.</span>
+          </button>
+        </div>
+
+        <p className="mb-4 mt-8 text-sm font-extrabold uppercase tracking-[0.16em] text-[#3d2a17]">
           Select JLPT Level
         </p>
         <div className="flex flex-wrap gap-4">
@@ -312,10 +422,34 @@ function IdleLobby({
           <button
             type="button"
             onClick={onPrepare}
-            className="mt-9 flex h-16 w-full max-w-xl items-center justify-center gap-3 rounded-full bg-[#f5a623] text-2xl font-bold text-[#291800] shadow-[0_10px_28px_rgba(26,20,16,0.06)] transition hover:bg-[#ffb955]"
+            disabled={isJoining}
+            className="mt-9 flex h-16 w-full max-w-xl items-center justify-center gap-3 rounded-full bg-[#f5a623] text-2xl font-bold text-[#291800] shadow-[0_10px_28px_rgba(26,20,16,0.06)] transition hover:bg-[#ffb955] disabled:opacity-60"
           >
-            <IconSearch size={26} /> Find Partner
+            {isJoining ? <IconLoader2 className="animate-spin" size={26} /> : matchMode === 'private' ? <IconPlus size={26} /> : <IconSearch size={26} />}
+            {matchMode === 'private' ? 'Create Private Room' : 'Find Partner'}
           </button>
+
+          {matchMode === 'private' && (
+            <div className="mt-5 flex w-full max-w-xl flex-col gap-3 rounded-xl border border-[#d7c3ae] bg-white p-4 sm:flex-row">
+              <input
+                value={inviteCodeInput}
+                onChange={(event) => onInviteCodeInput(event.target.value.toUpperCase())}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') onJoinPrivate();
+                }}
+                className="h-12 flex-1 rounded-full border border-[#d7c3ae] px-5 text-center text-lg font-bold tracking-[0.18em] text-[#211a12] outline-none focus:border-[#f5a623]"
+                placeholder="INVITE CODE"
+              />
+              <button
+                type="button"
+                onClick={onJoinPrivate}
+                disabled={isJoining}
+                className="h-12 rounded-full border border-[#835500] px-6 font-bold text-[#835500] transition hover:bg-[#fff1e4] disabled:opacity-60"
+              >
+                Join Code
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -434,9 +568,18 @@ function SearchingLobby({
         <h2 className="torisho-display text-4xl font-bold">Finding a partner</h2>
         <p className="mt-3 text-xl text-[#3d2a17]">Searching for {selectedLevel} partners...</p>
         {room && (
-          <p className="mt-3 rounded-full bg-[#fff1e4] px-4 py-2 text-sm font-bold text-[#665744]">
-            Room {room.id.slice(0, 8)} - {room.participantCount}/{room.maxParticipants}
-          </p>
+          <div className="mt-4 space-y-3">
+            <p className="rounded-full bg-[#fff1e4] px-4 py-2 text-sm font-bold text-[#665744]">
+              Room {room.id.slice(0, 8)} - {room.participantCount}/{room.maxParticipants}
+            </p>
+            {room.isPrivate && room.inviteCode && (
+              <div className="rounded-xl border border-[#d7c3ae] bg-[#fff8f4] px-5 py-4">
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#835500]">Invite code</p>
+                <p className="mt-1 text-4xl font-black tracking-[0.18em] text-[#211a12]">{room.inviteCode}</p>
+                <p className="mt-2 text-sm text-[#665744]">Ask your partner to choose Private Room and enter this code.</p>
+              </div>
+            )}
+          </div>
         )}
         <button
           type="button"

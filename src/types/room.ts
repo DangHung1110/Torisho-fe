@@ -35,6 +35,8 @@ export interface Room {
   endedAt?: string;
   participantCount: number;
   maxParticipants: number;
+  isPrivate: boolean;
+  inviteCode?: string | null;
   participants: RoomParticipant[];
 }
 

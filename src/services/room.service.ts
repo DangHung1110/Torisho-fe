@@ -10,10 +10,24 @@ export class RoomService {
     });
   }
 
+  static async createPrivateRoom(targetLevel: JLPTLevel): Promise<RoomMatchResponse> {
+    const request: JoinRoomRequest = { targetLevel };
+    return apiRequest<RoomMatchResponse>('/room/private', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  static async joinPrivateRoom(inviteCode: string): Promise<RoomMatchResponse> {
+    return apiRequest<RoomMatchResponse>(`/room/private/${encodeURIComponent(inviteCode.trim())}/join`, {
+      method: 'POST',
+    });
+  }
+
   static async getCurrentRoom(): Promise<Room | null> {
     try {
       return await apiRequest<Room>('/room/current');
-    } catch (error) {
+    } catch {
       return null;
     }
   }
