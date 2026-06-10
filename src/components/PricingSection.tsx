@@ -43,9 +43,9 @@ const plans = [
 
 export default function PricingSection() {
   return (
-    <section id="pricing" className="border-y border-[#d7c3ae] bg-[#fff8f4] py-12 sm:py-16">
+    <section id="pricing" className="border-y border-[#d7c3ae] bg-[#fff8f4] py-10 sm:py-12">
       <div className="torisho-shell">
-        <div className="mx-auto mb-10 max-w-3xl text-center">
+        <div className="mx-auto mb-8 max-w-3xl text-center">
           <p className="torisho-eyebrow mb-3">Pricing</p>
           <h2 className="torisho-section-title">Pick the Pace That Fits</h2>
           <p className="torisho-section-copy mx-auto mt-3 max-w-2xl">
@@ -58,25 +58,25 @@ export default function PricingSection() {
           {plans.map(({ Icon, ...plan }) => (
             <article
               key={plan.name}
-              className="relative flex min-h-[455px] flex-col overflow-hidden rounded-lg border border-[#d7c3ae] bg-white shadow-[0_6px_18px_rgba(26,20,16,0.06)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(54,37,20,0.12)]"
+              className="relative flex min-h-[410px] flex-col overflow-hidden rounded-lg border border-[#d7c3ae] bg-white shadow-[0_6px_18px_rgba(26,20,16,0.06)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(54,37,20,0.12)]"
             >
               {plan.highlight && (
                 <span className="absolute right-4 top-4 z-10 rounded-full bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#006b5f] shadow-sm">
                   {plan.highlight}
                 </span>
               )}
-              <div className="flex h-28 items-center justify-center" style={{ backgroundColor: plan.accent }}>
-                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-sm">
+              <div className="flex h-24 items-center justify-center" style={{ backgroundColor: plan.accent }}>
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-sm">
                   <Icon size={32} color={plan.accent} stroke={1.8} />
                 </span>
               </div>
 
-              <div className="flex flex-1 flex-col p-6">
+              <div className="flex flex-1 flex-col p-5">
                 <h3 className="torisho-display text-2xl font-semibold text-[#211a12]">
                   {plan.name}
                 </h3>
                 <div className="mt-5 flex items-end gap-2">
-                  <span className="text-4xl font-extrabold leading-none text-[#211a12]">{plan.price}</span>
+                  <span className="text-3xl font-extrabold leading-none text-[#211a12]">{plan.price}</span>
                   <span className="pb-1 text-sm font-semibold text-[#665744]">{plan.period}</span>
                 </div>
                 <p className="mt-4 min-h-[66px] text-sm leading-6 text-[#665744]">{plan.description}</p>

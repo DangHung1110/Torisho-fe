@@ -48,20 +48,20 @@ export function RegisterForm() {
 
   return (
     <div className="torisho-auth-grid bg-white text-[#211a12]">
-      <main className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-[#fffdfb] py-10 lg:py-8">
+      <main className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-[#fffdfb] py-6 lg:py-5">
         <div className="torisho-auth-form">
-          <Link href="/" className="mb-8 flex w-fit items-center gap-3 no-underline lg:hidden">
+          <Link href="/" className="mb-6 flex w-fit items-center gap-3 no-underline lg:hidden">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[0] shadow-sm ring-1 ring-[#d7c3ae]">
               <span className="text-2xl">{'\uD83D\uDC14'}</span>
             </span>
             <span className="font-[var(--font-display)] text-2xl font-bold text-[#7a4300]">Torisho</span>
           </Link>
 
-          <div className="mb-9 text-center">
-            <h1 className="torisho-display text-5xl font-bold leading-tight text-[#7a4300]">
+          <div className="mb-6 text-center">
+            <h1 className="torisho-display text-4xl font-bold leading-tight text-[#7a4300]">
               Start your journey
             </h1>
-            <p className="mt-3 text-xl text-[#3d2a17]">Create your free Torisho account</p>
+            <p className="mt-2 text-lg text-[#3d2a17]">Create your free Torisho account</p>
           </div>
 
           {error && (
@@ -71,7 +71,7 @@ export function RegisterForm() {
             </div>
           )}
 
-          <form onSubmit={handleRegister} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-3">
             <AuthField
               label="Username"
               value={username}
@@ -110,7 +110,7 @@ export function RegisterForm() {
               required
             />
 
-            <label className="flex items-center gap-3 pt-2 text-base text-[#3d2a17]">
+            <label className="flex items-center gap-3 pt-1 text-sm text-[#3d2a17]">
               <input
                 type="checkbox"
                 checked={agreed}
@@ -123,29 +123,29 @@ export function RegisterForm() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-3 flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[#f5a623] px-6 text-sm font-extrabold uppercase tracking-[0.08em] text-[#291800] transition-all hover:bg-[#ffb955] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f5a623] px-6 text-sm font-extrabold uppercase tracking-[0.08em] text-[#291800] transition-all hover:bg-[#ffb955] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? 'Creating...' : 'Create Account'}
               <IconArrowRight size={18} />
             </button>
           </form>
 
-          <div className="my-7 flex items-center gap-5">
+          <div className="my-5 flex items-center gap-5">
             <div className="h-px flex-1 bg-[#d7c3ae]" />
-            <span className="text-base text-[#665744]">or</span>
+            <span className="text-sm text-[#665744]">or</span>
             <div className="h-px flex-1 bg-[#d7c3ae]" />
           </div>
 
           <button
             type="button"
             onClick={() => AuthService.loginWithGoogle()}
-            className="flex h-[52px] w-full items-center justify-center gap-4 rounded-full border border-[#d7c3ae] bg-white px-6 text-lg font-medium text-[#211a12] transition-colors hover:bg-[#fff8f4]"
+            className="flex h-12 w-full items-center justify-center gap-4 rounded-full border border-[#d7c3ae] bg-white px-6 text-base font-medium text-[#211a12] transition-colors hover:bg-[#fff8f4]"
           >
             <GoogleLogo />
             Continue with Google
           </button>
 
-          <p className="mt-10 text-center text-base text-[#3d2a17]">
+          <p className="mt-6 text-center text-sm text-[#3d2a17]">
             Already have an account?{' '}
             <Link href="/login" className="font-bold text-[#211a12] underline decoration-[#d7c3ae] underline-offset-4">
               Login
@@ -154,25 +154,25 @@ export function RegisterForm() {
         </div>
       </main>
 
-      <aside className="relative hidden min-h-screen overflow-hidden bg-gradient-to-br from-[#006b5f] via-[#64885a] to-[#f5a623] px-14 py-12 text-white lg:flex lg:items-center lg:justify-center">
+      <aside className="relative hidden min-h-screen overflow-hidden bg-gradient-to-br from-[#006b5f] via-[#64885a] to-[#f5a623] px-10 py-8 text-white lg:flex lg:items-center lg:justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,.22),_transparent_58%)]" />
-        <div className="relative z-10 flex max-w-[560px] flex-col items-center text-center">
-          <div className="relative h-[320px] w-[320px] bg-white shadow-[0_24px_42px_rgba(54,37,20,0.20)] ring-1 ring-white/60">
+        <div className="relative z-10 flex max-w-[500px] flex-col items-center text-center">
+          <div className="relative h-[260px] w-[260px] bg-white shadow-[0_24px_42px_rgba(54,37,20,0.20)] ring-1 ring-white/60">
             <Image
               src={registerArtwork}
               alt="Torisho chicken sensei studying Japanese"
               fill
               priority
               unoptimized
-              sizes="320px"
+              sizes="260px"
               className="object-contain p-5"
             />
           </div>
 
-          <h2 className="torisho-display mt-14 text-5xl font-bold leading-tight text-white drop-shadow-sm">
+          <h2 className="torisho-display mt-9 text-4xl font-bold leading-tight text-white drop-shadow-sm">
             Join thousands of Japanese learners
           </h2>
-          <p className="mt-8 text-xl leading-8 text-white/90">
+          <p className="mt-5 text-lg leading-7 text-white/90">
             Master reading, writing, and vocabulary with Torisho&apos;s guided curriculum.
           </p>
         </div>
@@ -198,7 +198,7 @@ function AuthField({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-[#211a12]">
+      <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#211a12]">
         {label}
       </span>
       <input

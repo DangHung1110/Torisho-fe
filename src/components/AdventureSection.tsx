@@ -51,10 +51,10 @@ const adventures = [
 
 export default function AdventureSection() {
   return (
-    <section id="adventure" className="relative overflow-hidden bg-white py-12 sm:py-16">
+    <section id="adventure" className="relative overflow-hidden bg-white py-10 sm:py-12">
       <div className="absolute inset-x-0 top-0 h-px bg-[#d7c3ae]" />
       <div className="torisho-shell">
-        <div className="mx-auto mb-10 max-w-3xl text-center">
+        <div className="mx-auto mb-8 max-w-3xl text-center">
           <p className="torisho-eyebrow mb-3">Adventure</p>
           <h2 className="torisho-section-title">Adventure Awaits</h2>
           <p className="torisho-section-copy mx-auto mt-3 max-w-2xl">
@@ -65,7 +65,7 @@ export default function AdventureSection() {
 
         <div className="relative">
           <div className="absolute left-5 top-8 bottom-8 hidden w-px bg-[#d7c3ae] lg:left-1/2 lg:block" />
-          <div className="space-y-8 lg:space-y-6">
+          <div className="space-y-7 lg:space-y-5">
             {adventures.map((adventure, index) => {
               const Icon = adventure.Icon;
               const reverse = index % 2 === 1;
@@ -73,13 +73,13 @@ export default function AdventureSection() {
               return (
                 <article
                   key={adventure.title}
-                  className={`relative grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14 ${
+                  className={`relative grid grid-cols-1 items-center gap-7 lg:grid-cols-2 lg:gap-10 ${
                     reverse ? 'lg:[&>div:first-child]:order-2' : ''
                   }`}
                 >
                   <div className="flex justify-center">
                     <div
-                      className="relative h-[230px] w-[230px] overflow-hidden rounded-full border-8 border-white shadow-[0_16px_38px_rgba(54,37,20,0.16)] ring-1 ring-[#eee0d2] sm:h-[270px] sm:w-[270px]"
+                      className="relative h-[210px] w-[210px] overflow-hidden rounded-full border-8 border-white shadow-[0_16px_38px_rgba(54,37,20,0.16)] ring-1 ring-[#eee0d2] sm:h-[245px] sm:w-[245px]"
                       style={{
                         background:
                           `linear-gradient(135deg, ${adventure.color}cc, rgba(255,248,244,0.58)), url(${adventure.image}) center/cover no-repeat`,
@@ -98,7 +98,7 @@ export default function AdventureSection() {
                     <p className="torisho-eyebrow mb-3">
                       {adventure.subtitle}
                     </p>
-                    <h3 className="torisho-display text-3xl font-semibold leading-tight text-[#211a12] sm:text-[34px]">
+                    <h3 className="torisho-display text-2xl font-semibold leading-tight text-[#211a12] sm:text-[30px]">
                       {adventure.title}
                     </h3>
                     <p className="mt-3 text-base leading-7 text-[#665744]">{adventure.description}</p>
@@ -109,14 +109,14 @@ export default function AdventureSection() {
           </div>
         </div>
 
-        <div className="mt-12 overflow-hidden rounded-lg bg-[#006b5f] shadow-[0_16px_30px_rgba(0,79,70,0.18)]">
+        <div className="mt-10 overflow-hidden rounded-lg bg-[#006b5f] shadow-[0_16px_30px_rgba(0,79,70,0.18)]">
           <div className="grid grid-cols-1 items-center gap-6 px-6 py-7 text-white sm:px-10 lg:grid-cols-[1fr_auto] lg:px-10">
             <div>
               <div className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-[#62fae3]">
                 <Compass size={18} />
                 Start the route
               </div>
-              <h3 className="torisho-display text-3xl font-semibold sm:text-4xl">
+              <h3 className="torisho-display text-2xl font-semibold sm:text-3xl">
                 Learn Japanese one guided zone at a time.
               </h3>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-white/80">

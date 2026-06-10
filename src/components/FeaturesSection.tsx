@@ -85,7 +85,7 @@ const jlptNodes = [
 export default function FeaturesSection() {
   return (
     <>
-      <section className="border-y border-[#d7c3ae] bg-[#fff1e4] py-12 sm:py-14">
+      <section className="border-y border-[#d7c3ae] bg-[#fff1e4] py-10 sm:py-12">
         <div className="torisho-shell">
           <SectionHeader
             eyebrow="Daily flow"
@@ -96,7 +96,7 @@ export default function FeaturesSection() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
             {workflowSteps.map((step) => (
               <article key={step.title} className="flex flex-col items-center text-center">
-                <div className="relative mb-4 h-28 w-28 overflow-hidden rounded-full border-2 border-[#ffddb4] bg-white shadow-sm">
+                <div className="relative mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-[#ffddb4] bg-white shadow-sm">
                   <Image
                     src={workflowArtwork}
                     alt=""
@@ -120,7 +120,7 @@ export default function FeaturesSection() {
         </div>
       </section>
 
-      <section id="features" className="bg-white py-12 sm:py-14">
+      <section id="features" className="bg-white py-10 sm:py-12">
         <div className="torisho-shell">
           <SectionHeader
             eyebrow="Features"
@@ -132,10 +132,10 @@ export default function FeaturesSection() {
             {toolkit.map(({ Icon, ...feature }) => (
               <article
                 key={feature.title}
-                className="group flex min-h-[180px] flex-col items-center justify-center rounded-lg border border-[#d7c3ae] bg-[#fffdfb] p-5 text-center shadow-[0_4px_12px_rgba(26,20,16,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(54,37,20,0.10)]"
+                className="group flex min-h-[160px] flex-col items-center justify-center rounded-lg border border-[#d7c3ae] bg-[#fffdfb] p-4 text-center shadow-[0_4px_12px_rgba(26,20,16,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(54,37,20,0.10)]"
               >
                 <span
-                  className="mb-4 flex h-14 w-14 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-105"
+                  className="mb-3 flex h-12 w-12 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-105"
                   style={{ backgroundColor: feature.color }}
                 >
                   <Icon size={24} color={feature.iconColor} stroke={2} />
@@ -150,7 +150,7 @@ export default function FeaturesSection() {
         </div>
       </section>
 
-      <section className="border-y border-[#d7c3ae] bg-[#fff8f4] py-12 sm:py-14">
+      <section className="border-y border-[#d7c3ae] bg-[#fff8f4] py-10 sm:py-12">
         <div className="torisho-shell">
           <SectionHeader
             eyebrow="Curriculum"

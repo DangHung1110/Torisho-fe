@@ -20,18 +20,18 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#d7c3ae] bg-[#fff8f4]/95 backdrop-blur-md">
-      <div className="torisho-shell flex h-[74px] items-center justify-between gap-5">
+      <div className="torisho-shell flex h-16 items-center justify-between gap-4">
         <Link href="/" className="group flex flex-shrink-0 items-center gap-3 no-underline">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-2xl shadow-sm ring-1 ring-[#d7c3ae] transition-transform duration-300 group-hover:rotate-6">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl shadow-sm ring-1 ring-[#d7c3ae] transition-transform duration-300 group-hover:rotate-6">
             {'\uD83D\uDC14'}
           </span>
-          <span className="torisho-display text-2xl font-bold text-[#7a4300] transition-colors group-hover:text-[#a86400]">
+          <span className="torisho-display text-xl font-bold text-[#7a4300] transition-colors group-hover:text-[#a86400]">
             Torisho
           </span>
         </Link>
 
         {isHomePage && (
-          <nav className="hidden items-center justify-center gap-8 md:flex">
+          <nav className="hidden items-center justify-center gap-6 md:flex">
             {homeLinks.map((item) => (
               <a
                 key={item.label}
@@ -80,13 +80,13 @@ export default function Header() {
             <>
               <Link
                 href="/login"
-                className="hidden rounded-full border border-[#d7c3ae] bg-transparent px-5 py-2.5 text-sm font-semibold text-[#3d2a17] transition-colors hover:bg-white sm:inline-flex"
+                className="hidden rounded-full border border-[#d7c3ae] bg-transparent px-4 py-2 text-sm font-semibold text-[#3d2a17] transition-colors hover:bg-white sm:inline-flex"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="rounded-full bg-[#f5a623] px-5 py-2.5 text-sm font-bold text-[#291800] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#ffb955] hover:shadow-md"
+                className="rounded-full bg-[#f5a623] px-4 py-2 text-sm font-bold text-[#291800] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#ffb955] hover:shadow-md"
               >
                 Register
               </Link>
