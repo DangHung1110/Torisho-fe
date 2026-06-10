@@ -58,21 +58,21 @@ export default function HeroSection() {
         </span>
       </div>
 
-      <div className="torisho-shell relative z-10 grid min-h-[620px] grid-cols-1 items-center gap-14 py-12 md:grid-cols-[0.92fr_1fr] lg:min-h-[650px] lg:py-14">
-        <div className="flex max-w-[585px] flex-col items-start gap-7">
+      <div className="torisho-shell relative z-10 grid min-h-[540px] grid-cols-1 items-center gap-10 py-10 md:grid-cols-[0.92fr_1fr] lg:min-h-[570px] lg:py-11">
+        <div className="flex max-w-[545px] flex-col items-start gap-6">
           <div className="inline-flex rounded-full border border-[#d7c3ae] bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.1em] text-[#835500] shadow-sm">
             JLPT N5 to N1 guided path
           </div>
 
           <div className="flex flex-col gap-4">
-            <h1 className="torisho-display text-[46px] font-bold leading-[1.05] text-[#211a12] sm:text-[58px] lg:text-[66px]">
+            <h1 className="torisho-display text-[40px] font-bold leading-[1.05] text-[#211a12] sm:text-[50px] lg:text-[56px]">
               Master Japanese
               <span className="mt-2 block min-h-[1.08em] text-[#835500]">
                 {displayText}
                 <span className="ml-1 inline-block animate-blink text-[#f5a623]">|</span>
               </span>
             </h1>
-            <p className="max-w-[500px] text-base leading-7 text-[#524534] sm:text-lg">
+            <p className="max-w-[480px] text-base leading-7 text-[#524534]">
               Structured JLPT paths from N5 to N1. Learn through adventure zones, daily quizzes,
               dictionary lookup, flashcards, and speaking practice.
             </p>
@@ -81,14 +81,14 @@ export default function HeroSection() {
           <div className="flex flex-wrap items-center gap-4">
             <Link
               href="/register"
-              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#f5a623] px-7 py-3 text-base font-bold text-[#291800] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#ffb955] hover:shadow-md"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#f5a623] px-6 py-2.5 text-sm font-bold text-[#291800] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#ffb955] hover:shadow-md"
             >
               Start Learning
               <IconArrowRight size={18} stroke={2.2} />
             </Link>
             <Link
               href="/dictionary"
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#857462] bg-transparent px-7 py-3 text-base font-semibold text-[#211a12] transition-all hover:bg-[#fff1e4]"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#857462] bg-transparent px-6 py-2.5 text-sm font-semibold text-[#211a12] transition-all hover:bg-[#fff1e4]"
             >
               <IconSearch size={18} stroke={2} />
               Explore Dictionary
@@ -96,16 +96,16 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-[500px] items-center justify-center md:justify-self-end">
+        <div className="relative mx-auto flex w-full max-w-[430px] items-center justify-center md:justify-self-end">
           <div className="absolute inset-8 rounded-full bg-white/70 blur-3xl" />
-          <div className="relative aspect-square w-full max-w-[470px] overflow-hidden bg-white shadow-[0_18px_34px_rgba(54,37,20,0.16)] ring-1 ring-[#eee0d2]">
+          <div className="relative aspect-square w-full max-w-[410px] overflow-hidden bg-white shadow-[0_18px_34px_rgba(54,37,20,0.16)] ring-1 ring-[#eee0d2]">
             <Image
               src={heroArtwork}
               alt="Torisho chicken sensei studying Japanese"
               fill
               priority
               unoptimized
-              sizes="(max-width: 768px) 86vw, 470px"
+              sizes="(max-width: 768px) 86vw, 410px"
               className="object-contain p-6"
             />
           </div>

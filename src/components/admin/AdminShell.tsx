@@ -44,13 +44,13 @@ export function AdminShell({ children }: AdminShellProps) {
 
   return (
     <div className="min-h-screen bg-[#fff8f4] text-[#211a12]">
-      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-80 flex-col border-r border-[#d7c3ae] bg-[#fff1e4] px-6 py-7 lg:flex">
-        <Link href="/admin/dashboard" className="mb-8 flex items-center gap-3 no-underline">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-[#d7c3ae]">
-            <IconShieldLock size={25} className="text-[#835500]" />
+      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-72 flex-col border-r border-[#d7c3ae] bg-[#fff1e4] px-5 py-6 lg:flex">
+        <Link href="/admin/dashboard" className="mb-7 flex items-center gap-3 no-underline">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-[#d7c3ae]">
+            <IconShieldLock size={23} className="text-[#835500]" />
           </span>
           <span>
-            <span className="torisho-display block text-3xl font-bold leading-none text-[#835500]">
+            <span className="torisho-display block text-2xl font-bold leading-none text-[#835500]">
               Torisho
             </span>
             <span className="mt-2 block text-xs font-extrabold uppercase tracking-[0.14em] text-[#3d2a17]">
@@ -59,7 +59,7 @@ export function AdminShell({ children }: AdminShellProps) {
           </span>
         </Link>
 
-        <nav className="space-y-3">
+        <nav className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -68,13 +68,13 @@ export function AdminShell({ children }: AdminShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex h-12 items-center gap-4 rounded-lg px-5 text-lg no-underline transition-colors ${
+                className={`flex h-11 items-center gap-3 rounded-lg px-4 text-base no-underline transition-colors ${
                   isActive
                     ? 'bg-[#f5a623] font-bold text-[#291800]'
                     : 'text-[#3d2a17] hover:bg-[#f4e6d8]'
                 }`}
               >
-                <Icon size={24} stroke={1.8} />
+                <Icon size={22} stroke={1.8} />
                 {item.label}
               </Link>
             );
@@ -84,7 +84,7 @@ export function AdminShell({ children }: AdminShellProps) {
         <div className="mt-auto border-t border-[#d7c3ae] pt-5">
           <Link
             href="/dashboard"
-            className="mb-7 flex h-14 items-center justify-center gap-3 rounded-full bg-[#f5a623] px-5 text-lg font-bold text-[#291800] no-underline transition-colors hover:bg-[#ffb955]"
+            className="mb-6 flex h-12 items-center justify-center gap-3 rounded-full bg-[#f5a623] px-5 text-base font-bold text-[#291800] no-underline transition-colors hover:bg-[#ffb955]"
           >
             <IconLayoutDashboard size={21} />
             User Dashboard
@@ -93,7 +93,7 @@ export function AdminShell({ children }: AdminShellProps) {
           <div className="space-y-2">
             <Link
               href="#"
-              className="flex h-11 items-center gap-4 rounded-lg px-5 text-lg text-[#3d2a17] no-underline transition-colors hover:bg-[#f4e6d8]"
+              className="flex h-10 items-center gap-3 rounded-lg px-4 text-base text-[#3d2a17] no-underline transition-colors hover:bg-[#f4e6d8]"
             >
               <IconHelpCircle size={23} stroke={1.8} />
               Help
@@ -101,7 +101,7 @@ export function AdminShell({ children }: AdminShellProps) {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex h-11 w-full items-center gap-4 rounded-lg px-5 text-left text-lg text-[#3d2a17] transition-colors hover:bg-[#f4e6d8]"
+              className="flex h-10 w-full items-center gap-3 rounded-lg px-4 text-left text-base text-[#3d2a17] transition-colors hover:bg-[#f4e6d8]"
             >
               <IconLogout size={23} stroke={1.8} />
               Logout
@@ -140,7 +140,7 @@ export function AdminShell({ children }: AdminShellProps) {
         </nav>
       </header>
 
-      <main className="min-h-screen lg:ml-80">{children}</main>
+      <main className="min-h-screen lg:ml-72">{children}</main>
     </div>
   );
 }

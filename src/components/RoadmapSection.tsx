@@ -35,9 +35,9 @@ const typeTone: Record<string, string> = {
 
 export default function RoadmapSection() {
   return (
-    <section id="roadmap" className="bg-white py-12 sm:py-16">
+    <section id="roadmap" className="bg-white py-10 sm:py-12">
       <div className="torisho-shell">
-        <div className="mx-auto mb-10 max-w-3xl text-center">
+        <div className="mx-auto mb-8 max-w-3xl text-center">
           <p className="torisho-eyebrow mb-3">Roadmap</p>
           <h2 className="torisho-section-title">What Comes Next</h2>
           <p className="torisho-section-copy mx-auto mt-3 max-w-2xl">
@@ -47,9 +47,9 @@ export default function RoadmapSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-lg border border-[#d7c3ae] bg-[#fff8f4] p-6 shadow-[0_6px_18px_rgba(26,20,16,0.05)] sm:p-8">
-            <div className="mb-7 flex items-center gap-4">
-              <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#f5a623] text-white shadow-sm">
+          <article className="rounded-lg border border-[#d7c3ae] bg-[#fff8f4] p-5 shadow-[0_6px_18px_rgba(26,20,16,0.05)] sm:p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#f5a623] text-white shadow-sm">
                 <Flag size={30} />
               </span>
               <div>
@@ -91,9 +91,9 @@ export default function RoadmapSection() {
             </div>
           </article>
 
-          <article className="rounded-lg border border-[#d7c3ae] bg-[#fffdfb] p-6 shadow-[0_6px_18px_rgba(26,20,16,0.05)] sm:p-8">
-            <div className="mb-7 flex items-center gap-4">
-              <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#9b72cf] text-white shadow-sm">
+          <article className="rounded-lg border border-[#d7c3ae] bg-[#fffdfb] p-5 shadow-[0_6px_18px_rgba(26,20,16,0.05)] sm:p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#9b72cf] text-white shadow-sm">
                 <Compass size={30} />
               </span>
               <div>
